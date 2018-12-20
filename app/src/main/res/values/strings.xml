@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">VideoDemo1</string>
+    <string name="camera_error">摄像头错误</string>
+    <string name="request_permission">请求权限</string>
+</resources>
