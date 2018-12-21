@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.vily.videodemo1;
+package com.vily.videodemo1.camera2;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.TextureView;
+//import android.view.TextureView;
 
 /**
  * A {@link TextureView} that can be adjusted to a specified aspect ratio.

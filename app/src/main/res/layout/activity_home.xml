@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <Button
+        android:id="@+id/btn_camera1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="camera1"
+        android:layout_marginTop="40dp"/>
+
+    <Button
+    android:id="@+id/btn_camera2"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="camera2"
+    android:layout_marginTop="20dp"/>
+
+    <Button
+        android:id="@+id/btn_media_recorder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="MediaRecorder"
+        android:layout_marginTop="20dp"/>
+</LinearLayout>

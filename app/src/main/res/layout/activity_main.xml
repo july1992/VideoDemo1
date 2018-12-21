@@ -5,16 +5,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.vily.videodemo1.MainActivity">
+    tools:context="com.vily.videodemo1.camera2.MainActivity">
 
 
 
-    <com.vily.videodemo1.AutoFitTextureView
+    <com.vily.videodemo1.camera2.AutoFitTextureView
         android:id="@+id/texture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        />
 
+    <Button
+        android:id="@+id/btn_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:text="拍照"/>
 
 </RelativeLayout>
