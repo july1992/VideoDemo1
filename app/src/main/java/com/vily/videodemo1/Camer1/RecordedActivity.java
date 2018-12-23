@@ -8,18 +8,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-
-import com.alibaba.fastjson.JSON;
 import com.vily.videodemo1.R;
 import com.vily.videodemo1.netty.NettyClient;
 import com.vily.videodemo1.netty.NettyListener;
-
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-
-import static android.widget.Toast.LENGTH_SHORT;
 
 
 /**
@@ -178,7 +170,7 @@ public class RecordedActivity extends AppCompatActivity {
 
             @Override
             public void onAudioByte(byte[] data, int len) {          //   3584
-                Log.i(TAG, "onAudioByte: ----------音频流："+data.length);
+//                Log.i(TAG, "onAudioByte: ----------音频流："+data.length);
 //                if (!mNettyClient.getConnectStatus()) {
 //                    Toast.makeText(getApplicationContext(), "未连接,请先连接", LENGTH_SHORT).show();
 //                } else {

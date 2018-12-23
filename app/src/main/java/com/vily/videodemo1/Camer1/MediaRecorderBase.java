@@ -432,6 +432,7 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 			} else {
 				Collections.sort(rates);
 				for (int i = rates.size() - 1; i >= 0; i--) {
+					Log.i("sdadad", "prepareCameraParaments: ---------------rates.get(i)："+rates.get(i));
 					if (rates.get(i) <= MAX_FRAME_RATE) {
 						mFrameRate = rates.get(i);
 						break;
