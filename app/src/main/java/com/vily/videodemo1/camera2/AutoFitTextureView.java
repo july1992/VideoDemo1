@@ -18,6 +18,7 @@ package com.vily.videodemo1.camera2;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.TextureView;
 //import android.view.TextureView;
 
@@ -58,11 +59,13 @@ public class AutoFitTextureView extends TextureView {
         requestLayout();
     }
 
-//    @Override
-//    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-//        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-//        int width = MeasureSpec.getSize(widthMeasureSpec);
-//        int height = MeasureSpec.getSize(heightMeasureSpec);
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        Log.i("", "onMeasure: -----------mRatioWidth:"+mRatioWidth+"-----mRatioHeight:"+mRatioHeight+"-----width:"+width+"----height:"+height);
 //        if (0 == mRatioWidth || 0 == mRatioHeight) {
 //            setMeasuredDimension(width, height);
 //        } else {
@@ -72,6 +75,8 @@ public class AutoFitTextureView extends TextureView {
 //                setMeasuredDimension(height * mRatioWidth / mRatioHeight, height);
 //            }
 //        }
-//    }
+        setMeasuredDimension(widthMeasureSpec,heightMeasureSpec);
+
+    }
 
 }

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -15,6 +16,8 @@ import android.widget.Button;
 import com.vily.videodemo1.Camer1.RecordedActivity;
 import com.vily.videodemo1.camera2.MainActivity;
 import com.vily.videodemo1.media.MediaActivity;
+
+import java.io.File;
 
 /**
  *  * description : 
@@ -44,18 +47,18 @@ public class HomeActivtiy extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
+        switch (view.getId()) {
 
-            case R.id.btn_camera1 :
-                if(initPermission()){
-                    Intent intent=new Intent(HomeActivtiy.this,RecordedActivity.class);
+            case R.id.btn_camera1:
+                if (initPermission()) {
+                    Intent intent = new Intent(HomeActivtiy.this, RecordedActivity.class);
 
                     startActivity(intent);
                 }
                 break;
-            case R.id.btn_camera2 :
-                if(initPermission()){
-                    Intent intent=new Intent(HomeActivtiy.this,MainActivity.class);
+            case R.id.btn_camera2:
+                if (initPermission()) {
+                    Intent intent = new Intent(HomeActivtiy.this, MainActivity.class);
 
                     startActivity(intent);
                 }
@@ -63,14 +66,22 @@ public class HomeActivtiy extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_media_recorder:
 
-                if(initPermission()){
-                    Intent intent=new Intent(HomeActivtiy.this,MediaActivity.class);
 
-                    startActivity(intent);
+                if (ContextCompat.checkSelfPermission(HomeActivtiy.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    //CAMERA  WRITE_EXTERNAL_STORAGE  READ_EXTERNAL_STORAGE 权限
+                    ActivityCompat.requestPermissions( HomeActivtiy.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                            1);
                 }
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                String path = "/storage/emulated/0/ssss.mp4";//该路径可以自定义
+                File file = new File(path);
+                Uri uri = Uri.fromFile(file);
+                intent.setDataAndType(uri, "video/*");
+                startActivity(intent);
 
                 break;
-            default :
+            default:
                 break;
         }
     }
@@ -85,17 +96,17 @@ public class HomeActivtiy extends AppCompatActivity implements View.OnClickListe
         if (ContextCompat.checkSelfPermission(HomeActivtiy.this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             //CAMERA  WRITE_EXTERNAL_STORAGE  READ_EXTERNAL_STORAGE 权限
-            ActivityCompat.requestPermissions(  HomeActivtiy.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+            ActivityCompat.requestPermissions(HomeActivtiy.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+                    1);
+        } else if (ContextCompat.checkSelfPermission(HomeActivtiy.this, Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED) {
+            //CAMERA  WRITE_EXTERNAL_STORAGE  READ_EXTERNAL_STORAGE 权限
+            ActivityCompat.requestPermissions((Activity) HomeActivtiy.this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                     1);
         } else if (ContextCompat.checkSelfPermission(HomeActivtiy.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             //CAMERA  WRITE_EXTERNAL_STORAGE  READ_EXTERNAL_STORAGE 权限
-            ActivityCompat.requestPermissions((Activity) HomeActivtiy.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                    1);
-        } else if (ContextCompat.checkSelfPermission(HomeActivtiy.this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            //CAMERA  WRITE_EXTERNAL_STORAGE  READ_EXTERNAL_STORAGE 权限
-            ActivityCompat.requestPermissions((Activity) HomeActivtiy.this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
+            ActivityCompat.requestPermissions((Activity) HomeActivtiy.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                     1);
         } else {
             return true;

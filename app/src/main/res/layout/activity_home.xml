@@ -23,6 +23,6 @@
         android:id="@+id/btn_media_recorder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="MediaRecorder"
+        android:text="播放视频"
         android:layout_marginTop="20dp"/>
 </LinearLayout>
