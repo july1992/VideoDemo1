@@ -507,6 +507,27 @@ public class Camera2Utils {
         }
     }
 
+    // 打开闪光灯
+    public void openFlash() {
+        if(manager!=null){
+            try {
+                manager.setTorchMode(mCameraId,true);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    // 关闭闪光灯
+    public void closeFlash(){
+        if(manager!=null){
+            try {
+                manager.setTorchMode(mCameraId,false);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     // // 为Size定义一个比较器Comparator
     static class CompareSizesByArea implements Comparator<Size> {
 

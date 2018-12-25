@@ -6,10 +6,16 @@
 
     <com.vily.videodemo1.Camer1.FocusSurfaceView
         android:id="@+id/sv_ffmpeg"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
+    <com.vily.videodemo1.Camer1.FocusSurfaceView
+        android:id="@+id/sv_surface2"
+        android:layout_alignParentRight="true"
 
+        android:layout_width="100dp"
+        android:background="@drawable/second_surface"
+        android:layout_height="150dp" />
 
     <RelativeLayout
         android:id="@+id/rl_top"

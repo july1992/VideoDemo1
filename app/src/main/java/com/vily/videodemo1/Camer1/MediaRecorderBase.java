@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
+import android.view.SurfaceView;
 
 
 import com.vily.videodemo1.Camer1.utils.DeviceUtils;
@@ -138,7 +139,9 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 	 */
 	@SuppressWarnings("deprecation")
 	public void setSurfaceHolder(SurfaceHolder sh) {
+
 		if (sh != null) {
+//			mSurfaceHolder=sh;
 			sh.addCallback(this);
 			if (!DeviceUtils.hasHoneycomb()) {
 				sh.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -146,12 +149,6 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 		}
 	}
 
-
-//	/** 设置转码监听 */
-//	public void setOnEncodeListener(OnEncodeListener l) {
-//		this.mOnEncodeListener = l;
-//		mEncodeHanlder = new EncodeHandler(this);
-//	}
 
 	/** 设置预处理监听 */
 	public void setOnPreparedListener(OnPreparedListener l) {
@@ -657,6 +654,15 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 	/** 接收音频数据 */
 	@Override
 	public void receiveAudioData(byte[] sampleBuffer, int len) {
+
+	}
+
+	public void setSmallSurface(SurfaceHolder smallSurface) {
+
+		 mSurfaceHolder=smallSurface;
+		smallSurface.addCallback(this);
+
+		startPreview();
 
 	}
 

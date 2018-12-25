@@ -1,17 +1,31 @@
 package com.vily.videodemo1.Camer1;
 
 import android.hardware.Camera;
+import android.media.MediaCodec;
+import android.media.MediaFormat;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.vily.videodemo1.R;
 import com.vily.videodemo1.netty.NettyClient;
 import com.vily.videodemo1.netty.NettyListener;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.security.acl.Group;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -34,6 +48,12 @@ public class RecordedActivity extends AppCompatActivity {
     private ImageView iv_change_flash;
 
     private NettyClient mNettyClient;
+    private FocusSurfaceView mSv_surface2;
+
+    private String tag="big";
+    private int mWidth;
+    private int mHeight;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +67,10 @@ public class RecordedActivity extends AppCompatActivity {
 //        connectNettyServer("192.168.93.113", 1994);
         initMediaRecorder();
 
+
+        initListener();
     }
+
 
     private void connectNettyServer(String host, int port) {
         mNettyClient = new NettyClient(host, port);
@@ -101,6 +124,7 @@ public class RecordedActivity extends AppCompatActivity {
         sv_ffmpeg = findViewById(R.id.sv_ffmpeg);
         iv_change_flash = findViewById(R.id.iv_change_flash);
         iv_change_camera =  findViewById(R.id.iv_change_camera);
+        mSv_surface2 = findViewById(R.id.sv_surface2);
 
     }
 
@@ -108,25 +132,9 @@ public class RecordedActivity extends AppCompatActivity {
 
         sv_ffmpeg.setTouchFocus(mMediaRecorder);
 
-        iv_change_flash.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mMediaRecorder.changeFlash(RecordedActivity.this)) {
-                    iv_change_flash.setImageResource(R.mipmap.video_flash_open);
-                } else {
-                    iv_change_flash.setImageResource(R.mipmap.video_flash_close);
-                }
-            }
-        });
 
-        iv_change_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mMediaRecorder.switchCamera();
-                iv_change_flash.setImageResource(R.mipmap.video_flash_close);
-            }
-        });
-
+        mWidth = getWindowManager().getDefaultDisplay().getWidth();
+        mHeight = getWindowManager().getDefaultDisplay().getHeight();
 
     }
 
@@ -150,7 +158,7 @@ public class RecordedActivity extends AppCompatActivity {
             @Override
             public void onVideoByte(byte[] data, Camera camera) {   // 1382400字节 == 1.3MB
 
-                Log.i(TAG, "onVideoByte: -------视频流: "+data.length);
+//                Log.i(TAG, "onVideoByte: -------视频流: "+data.length);
 //                if (!mNettyClient.getConnectStatus()) {
 //                    Toast.makeText(getApplicationContext(), "未连接,请先连接", LENGTH_SHORT).show();
 //                } else {
@@ -169,31 +177,71 @@ public class RecordedActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onAudioByte(byte[] data, int len) {          //   3584
+            public void onAudioByte(final byte[] data, int len) {          //   3584
 //                Log.i(TAG, "onAudioByte: ----------音频流："+data.length);
-//                if (!mNettyClient.getConnectStatus()) {
-//                    Toast.makeText(getApplicationContext(), "未连接,请先连接", LENGTH_SHORT).show();
-//                } else {
-//                   mNettyClient.sendMsgToServer(data, new ChannelFutureListener() {
-//                        @Override
-//                        public void operationComplete(ChannelFuture channelFuture) throws Exception {
-//                            if (channelFuture.isSuccess()) {                //4
-//                                Log.d(TAG, "Write auth successful");
-//                            } else {
-//                                Log.d(TAG, "Write auth error");
-//                            }
-//                        }
-//                    });
-//                }
+
+
             }
         });
     }
+
+
+    private void initListener() {
+
+        iv_change_flash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mMediaRecorder.changeFlash(RecordedActivity.this)) {
+                    iv_change_flash.setImageResource(R.mipmap.video_flash_open);
+                } else {
+                    iv_change_flash.setImageResource(R.mipmap.video_flash_close);
+                }
+            }
+        });
+
+//        iv_change_camera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mMediaRecorder.switchCamera();
+//                iv_change_flash.setImageResource(R.mipmap.video_flash_close);
+//            }
+//        });
+        iv_change_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                switch (tag){
+
+                    case "big" :
+                        tag="small"; // 切换到小屏
+                        sv_ffmpeg.setAspectRatio(320,480);
+
+                        mSv_surface2.setAspectRatio(mWidth,mHeight);
+                        break;
+                    case "small" :
+                        tag="big";
+                        mSv_surface2.setAspectRatio(320,480);
+
+                        sv_ffmpeg.setAspectRatio(mWidth,mHeight);
+                        break;
+                    default :
+                        break;
+                }
+
+
+            }
+        });
+    }
+
 
     @Override
     protected void onResume() {
         super.onResume();
         mMediaRecorder.startPreview();
         mMediaRecorder.startRecord();
+
+
     }
 
     @Override
@@ -201,12 +249,14 @@ public class RecordedActivity extends AppCompatActivity {
         super.onPause();
         mMediaRecorder.stopPreview();
         mMediaRecorder.stopRecord();
+
+
     }
 
     @Override
     public void onBackPressed() {
         mMediaRecorder.release();
-//        mNettyClient.disconnect();
+
 
         finish();
     }
@@ -216,7 +266,7 @@ public class RecordedActivity extends AppCompatActivity {
         super.onDestroy();
 
         mMediaRecorder.release();
-//        mNettyClient.disconnect();
+
 
     }
 

@@ -17,5 +17,25 @@
         android:layout_alignParentTop="true"
         />
 
+    <RelativeLayout
+        android:id="@+id/rl_top"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/iv_change_flash"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:layout_margin="7dp"
+            android:src="@mipmap/video_flash_close"/>
+        <ImageView
+            android:id="@+id/iv_change_camera"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:layout_margin="7dp"
+            android:layout_alignParentRight="true"
+            android:src="@mipmap/video_camera"/>
+    </RelativeLayout>
 
 </RelativeLayout>

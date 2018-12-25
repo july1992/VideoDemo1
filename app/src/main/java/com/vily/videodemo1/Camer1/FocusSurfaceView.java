@@ -8,6 +8,7 @@ import android.graphics.Rect;
 import android.hardware.Camera;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
@@ -100,6 +101,8 @@ public class FocusSurfaceView extends SurfaceView {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+
+                Log.i("ssss", "onTouchEvent: ------------");
                 downX = event.getX();
                 downY = event.getY();
                 //判断是否支持对焦模式
@@ -115,7 +118,7 @@ public class FocusSurfaceView extends SurfaceView {
             case MotionEvent.ACTION_UP:
                 break;
         }
-        return true;
+        return false;
     }
 
     private void addFocusToWindow(){
@@ -157,5 +160,42 @@ public class FocusSurfaceView extends SurfaceView {
             });
             va.start();
         }
+    }
+
+
+    private int mRatioWidth=0;
+    private int mRatioHeight=0;
+    public void setAspectRatio(int width, int height) {
+        if (width < 0 || height < 0) {
+            throw new IllegalArgumentException("Size cannot be negative.");
+        }
+        mRatioWidth = width;
+        mRatioHeight = height;
+        requestLayout();
+    }
+
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        Log.i("----", "onMeasure: -----------正在切换大小屏幕");
+        if(mRatioWidth==0 && mRatioHeight==0){
+            setMeasuredDimension(widthMeasureSpec,heightMeasureSpec);
+        }else{
+            setMeasuredDimension(mRatioWidth,mRatioHeight);
+        }
+
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+
+
+        Log.i("---", "onLayout: -----------正在切换大小屏幕:"+changed+"--"+left+"---"+top+"---"+right+"---"+bottom);
+
+
     }
 }
