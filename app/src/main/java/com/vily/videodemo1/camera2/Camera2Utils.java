@@ -1,6 +1,7 @@
 package com.vily.videodemo1.camera2;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -166,7 +167,7 @@ public class Camera2Utils {
                         new CompareSizesByArea());
 
                 mImageReader = ImageReader.newInstance(largest.getWidth(), largest.getHeight(),
-                        ImageFormat.YV12, /*maxImages*/2);  // 修改
+                        ImageFormat.YV12, /*maxImages*/1);  // 修改
                 // TODO  预览数据反馈
                 mImageReader.setOnImageAvailableListener(
                         new ImageReader.OnImageAvailableListener() {
@@ -508,6 +509,7 @@ public class Camera2Utils {
     }
 
     // 打开闪光灯
+    @SuppressLint("NewApi")
     public void openFlash() {
         if(manager!=null){
             try {
@@ -518,6 +520,7 @@ public class Camera2Utils {
         }
     }
     // 关闭闪光灯
+    @SuppressLint("NewApi")
     public void closeFlash(){
         if(manager!=null){
             try {

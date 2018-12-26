@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * 视频录制抽象类
- * 
+ *
  * @author yixia.com
  *
  */
@@ -42,8 +42,6 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 	/** 视频高度 */
 	public static int VIDEO_HEIGHT = 720;
 
-	/** 未知错误 */
-	public static final int MEDIA_ERROR_UNKNOWN = 1;
 	/** 预览画布设置错误 */
 	public static final int MEDIA_ERROR_CAMERA_SET_PREVIEW_DISPLAY = 101;
 	/** 预览错误 */
@@ -66,15 +64,6 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 	/** 视频码率 2M */
 	public static final int VIDEO_BITRATE_HIGH = 2048;
 
-	/** 开始转码 */
-	protected static final int MESSAGE_ENCODE_START = 0;
-	/** 转码进度 */
-	protected static final int MESSAGE_ENCODE_PROGRESS = 1;
-	/** 转码完成 */
-	protected static final int MESSAGE_ENCODE_COMPLETE = 2;
-	/** 转码失败 */
-	protected static final int MESSAGE_ENCODE_ERROR = 3;
-
 	/** 最大帧率 */
 	public static final int MAX_FRAME_RATE = 25;
 	/** 最小帧率 */
@@ -91,13 +80,7 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 
 	/** 声音录制 */
 	protected AudioRecorder mAudioRecorder;
-//	/** 转码Handler */
-//	protected EncodeHandler mEncodeHanlder;
-	/** 拍摄存储对象 */
-	protected MediaObject mMediaObject;
 
-	/** 转码监听器 */
-	protected OnEncodeListener mOnEncodeListener;
 	/** 录制错误监听 */
 	protected OnErrorListener mOnErrorListener;
 	/** 录制已经准备就绪的监听 */
@@ -117,15 +100,8 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 	protected volatile long mPreviewFrameCallCount = 0;
 
 
-
-
 	public MediaRecorderBase() {
 
-	}
-
-	public int getFramRate(){
-
-		return mFrameRate;
 	}
 
 	public int getBitRate() {
@@ -141,7 +117,6 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 	public void setSurfaceHolder(SurfaceHolder sh) {
 
 		if (sh != null) {
-//			mSurfaceHolder=sh;
 			sh.addCallback(this);
 			if (!DeviceUtils.hasHoneycomb()) {
 				sh.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -364,37 +339,6 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 			startPreview();
 	}
 
-	/**
-	 * 设置视频临时存储文件夹
-	 *
-	 * @param key 视频输出的名称，同目录下唯一，一般取系统当前时间
-	 * @param path 文件夹路径
-	 * @return 录制信息对象
-	 */
-	public MediaObject setOutputDirectory(String key, String path) {
-		if (StringUtils.isNotEmpty(path)) {
-			File f = new File(path);
-			if (f != null) {
-				if (f.exists()) {
-					//已经存在，删除
-					if (f.isDirectory())
-						FileUtils.deleteDir(f);
-					else
-						FileUtils.deleteFile(f);
-				}
-
-				if (f.mkdirs()) {
-					mMediaObject = new MediaObject(key, path, mVideoBitrate);
-				}
-			}
-		}
-		return mMediaObject;
-	}
-
-	/** 设置视频信息 */
-	public void setMediaObject(MediaObject mediaObject) {
-		this.mMediaObject = mediaObject;
-	}
 
 	public void stopRecord() {
 		mRecording = false;
@@ -439,6 +383,8 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 		}
 
 		Size previewSize = mParameters.getPreviewSize();
+		Log.i(TAG, "prepareCameraParaments: -------:"+mFrameRate);
+		Log.i(TAG, "prepareCameraParaments: -------:"+getBitRate());
 		mParameters.setPreviewFrameRate(mFrameRate);
 		// mParameters.setPreviewFpsRange(15 * 1000, 20 * 1000);
 
@@ -486,8 +432,10 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 		}
 	}
 
+    private static final String TAG = "MediaRecorderBase";
 	/** 开始预览 */
 	public void startPreview() {
+        Log.i(TAG, "startPreview: ---------开始预览流吗");
 		if (mStartPreview || mSurfaceHolder == null || !mPrepared)
 			return;
 		else
@@ -552,7 +500,10 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 		if (size != null) {
 			PixelFormat pf = new PixelFormat();
 			PixelFormat.getPixelFormatInfo(mParameters.getPreviewFormat(), pf);
-			int buffSize = size.width * size.height * pf.bitsPerPixel / 8;
+//			int buffSize = size.width * size.height * pf.bitsPerPixel / 8;   // 1382400
+			int buffSize = size.width * size.height * 3 / 2;   // 1382400
+			Log.i(TAG, "setPreviewCallback: ---------size:"+size.width+"----"+size.height);
+			Log.i(TAG, "setPreviewCallback: ---------buffsize:"+buffSize);
 			try {
 				camera.addCallbackBuffer(new byte[buffSize]);
 				camera.addCallbackBuffer(new byte[buffSize]);
@@ -651,23 +602,33 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 		}.start();
 	}
 
-	/** 接收音频数据 */
-	@Override
-	public void receiveAudioData(byte[] sampleBuffer, int len) {
 
-	}
 
-	public void setSmallSurface(SurfaceHolder smallSurface) {
+	public void setNewSurface(SurfaceHolder sv_surface2) {
+		if(sv_surface2!=null){
+			sv_surface2.addCallback(new Callback() {
+				@Override
+				public void surfaceCreated(SurfaceHolder surfaceHolder) {
+					mSurfaceHolder=surfaceHolder;
+				}
 
-		 mSurfaceHolder=smallSurface;
-		smallSurface.addCallback(this);
+				@Override
+				public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
 
-		startPreview();
+				}
+
+				@Override
+				public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+
+				}
+			});
+			mSurfaceHolder=sv_surface2;
+		}
 
 	}
 
 	/**
-	 * 预处理监听 
+	 * 预处理监听
 	 *
 	 */
 	public interface OnPreparedListener {
@@ -679,12 +640,12 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 
 	/**
 	 * 错误监听
-	 * 
+	 *
 	 */
 	public interface OnErrorListener {
 		/**
 		 * 视频录制错误
-		 * 
+		 *
 		 * @param what
 		 * @param extra
 		 */
@@ -692,26 +653,11 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 
 		/**
 		 * 音频录制错误
-		 * 
+		 *
 		 * @param what
 		 * @param message
 		 */
 		void onAudioError(int what, String message);
-	}
-
-	/** 转码接口 */
-	public interface OnEncodeListener {
-		/** 开始转码 */
-		void onEncodeStart();
-
-		/** 转码进度 */
-		void onEncodeProgress(int progress);
-
-		/** 转码完成 */
-		void onEncodeComplete();
-
-		/** 转码失败 */
-		void onEncodeError();
 	}
 
 }

@@ -7,7 +7,9 @@
     <com.vily.videodemo1.Camer1.FocusSurfaceView
         android:id="@+id/sv_ffmpeg"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+         />
 
     <com.vily.videodemo1.Camer1.FocusSurfaceView
         android:id="@+id/sv_surface2"
@@ -16,7 +18,13 @@
         android:layout_width="100dp"
         android:background="@drawable/second_surface"
         android:layout_height="150dp" />
+    <com.vily.videodemo1.camera2.AutoFitTextureView
+        android:id="@+id/sv_surface3"
+        android:layout_alignParentRight="true"
 
+        android:layout_width="100dp"
+        android:background="@drawable/second_surface"
+        android:layout_height="150dp" />
     <RelativeLayout
         android:id="@+id/rl_top"
         android:layout_width="match_parent"

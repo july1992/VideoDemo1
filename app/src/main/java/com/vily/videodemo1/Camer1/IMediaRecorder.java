@@ -10,11 +10,11 @@ public interface IMediaRecorder {
 
 	/**
 	 * 开始录制
-	 * 
+	 *
 	 * @return 录制失败返回null
 	 */
-	public MediaObject.MediaPart startRecord();
-	
+	public void startRecord();
+
 	/**
 	 * 停止录制
 	 */

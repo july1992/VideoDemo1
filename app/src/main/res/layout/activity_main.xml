@@ -13,14 +13,21 @@
         android:id="@+id/texture"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        />
 
+        android:layout_alignParentRight="true"
+        />
+    <com.vily.videodemo1.camera2.AutoFitTextureView
+        android:id="@+id/sv_surface2"
+        android:layout_alignParentRight="true"
+
+        android:layout_width="wrap_content"
+        android:background="@drawable/second_surface"
+        android:layout_height="wrap_content" />
     <RelativeLayout
         android:id="@+id/rl_top"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:visibility="visible">
         <ImageView
             android:id="@+id/iv_change_flash"
             android:layout_width="50dp"

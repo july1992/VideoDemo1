@@ -56,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageView mIv_change_camera;
 
     private MediaCodec mMediaCoder;
+    private AutoFitTextureView mSv_surface2;
+    private int mHeight;
+    private int mWidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +67,18 @@ public class MainActivity extends AppCompatActivity {
 
 
         mTextureView = findViewById(R.id.texture);
+        mSv_surface2 = findViewById(R.id.sv_surface2);
         mIv_change_flash = findViewById(R.id.iv_change_flash);
         mIv_change_camera = findViewById(R.id.iv_change_camera);
 
 
         mCamera2Utils = new Camera2Utils(MainActivity.this, mTextureView);
+        mWidth = getWindowManager().getDefaultDisplay().getWidth();
+        mHeight = getWindowManager().getDefaultDisplay().getHeight();
 
+        mSv_surface2.setAspectRatio(320,480);
+
+        mSv_surface2.bringToFront();
         initMediaCodec();
 
         mCamera2Utils.prepare(mTextureView);
@@ -166,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isFlashOpen = false;  // 默认闪光灯是关闭的
+    private String flag="big";
 
     private void initListener() {
         mIv_change_flash.setOnClickListener(new View.OnClickListener() {
@@ -184,6 +194,60 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+        mSv_surface2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i(TAG, "onClick: ---------");
+                if("big".equals(flag)){
+                    flag="small";
+                    mTextureView.setAspectRatio(320,480);
+                    mSv_surface2.setAspectRatio(mWidth,mHeight);
+                    mTextureView.bringToFront();
+                }
+            }
+        });
+        mTextureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.i(TAG, "onClick: -----------");
+                if("small".equals(flag)){
+                    flag="big";
+                    mSv_surface2.setAspectRatio(320,480);
+                    mTextureView.setAspectRatio(mWidth,mHeight);
+                    mSv_surface2.bringToFront();
+                }
+            }
+        });
+
+//        mIv_change_camera.setOnClickListener(new View.OnClickListener() {
+//
+//
+//
+//            @Override
+//            public void onClick(View view) {
+//
+//                switch (flag){
+//
+//                    case "big" :
+//                        flag="small";
+//                        mTextureView.setAspectRatio(320,480);
+//                        mSv_surface2.setAspectRatio(mWidth,mHeight);
+//                        mTextureView.bringToFront();
+//                        break;
+//                    case "small" :
+//                        flag="big";
+//                        mSv_surface2.setAspectRatio(320,480);
+//                        mTextureView.setAspectRatio(mWidth,mHeight);
+//                        mSv_surface2.bringToFront();
+//                        break;
+//                    default :
+//                        break;
+//                }
+//
+//
+//            }
+//        });
         mCamera2Utils.setOnCameraStateListener(new Camera2Utils.OnCameraStateListener() {
             @Override
             public void onCameraState(String state) {
@@ -203,23 +267,23 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onDataBack(Image image) {
-                ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                final byte[] bytes = new byte[buffer.remaining()];
-                Log.i(TAG, "run: ------bytes视频预览帧：" + bytes.length);
-                executor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        long encodeTime = System.currentTimeMillis();
-                        flvPackage(bytes);
-
-                        Log.i(TAG, "run: ----------" + "编码第:" + (encodeCount++) + "帧，耗时:" + (System.currentTimeMillis() - encodeTime));
-
-                    }
-                });
-
-
-//                buffer.get(bytes);
-
+//                ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+//                final byte[] bytes = new byte[buffer.remaining()];
+//                Log.i(TAG, "run: ------bytes视频预览帧：" + bytes.length);
+//                executor.execute(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        long encodeTime = System.currentTimeMillis();
+//                        flvPackage(bytes);
+//
+//                        Log.i(TAG, "run: ----------" + "编码第:" + (encodeCount++) + "帧，耗时:" + (System.currentTimeMillis() - encodeTime));
+//
+//                    }
+//                });
+//
+//
+////                buffer.get(bytes);
+//
                 image.close();
 
             }

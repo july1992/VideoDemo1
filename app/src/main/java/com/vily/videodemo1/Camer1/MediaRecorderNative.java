@@ -21,17 +21,14 @@ public class MediaRecorderNative extends MediaRecorderBase implements MediaRecor
 
 	/** 开始录制 */
 	@Override
-	public MediaObject.MediaPart startRecord() {
-
-
-
+	public void startRecord() {
 		mRecording = true;
 		if (mAudioRecorder == null) {
 			mAudioRecorder = new AudioRecorder(this);
 			Log.i("sads", "startRecord: ---------音频开始录制");
 			mAudioRecorder.start();
 		}
-		return null;
+
 	}
 
 	public boolean getRecordState(){
@@ -76,12 +73,12 @@ public class MediaRecorderNative extends MediaRecorderBase implements MediaRecor
 		if (mOnErrorListener != null)
 			mOnErrorListener.onVideoError(what, extra);
 	}
-
-
-	private byte[] h264 = new byte[MediaRecorderBase.VIDEO_WIDTH*MediaRecorderBase.VIDEO_HEIGHT*3/2];
-	// getFramRate 每秒帧率    getBitRate 编码比特率
-	private AvcEncoder avcCodec=new AvcEncoder(MediaRecorderBase.VIDEO_WIDTH,MediaRecorderBase.VIDEO_HEIGHT
-			,getFramRate(),6000000);
+//
+//
+//	private byte[] h264 = new byte[MediaRecorderBase.VIDEO_WIDTH*MediaRecorderBase.VIDEO_HEIGHT*3/2];
+//	// getFramRate 每秒帧率    getBitRate 编码比特率
+//	private AvcEncoder avcCodec=new AvcEncoder(MediaRecorderBase.VIDEO_WIDTH,MediaRecorderBase.VIDEO_HEIGHT
+//			,getFramRate(),6000000);
 
 
 	/** 数据回调 */
