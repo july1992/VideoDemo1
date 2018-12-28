@@ -1,14 +1,26 @@
 package com.vily.videodemo1.Camer1.utils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.media.MediaFormat;
+import android.media.MediaMuxer;
+import android.os.Environment;
 import android.util.Log;
+import android.view.Surface;
+
+import com.vily.videodemo1.camera0.RecordActivity;
+import com.vily.videodemo1.manage.MediaMuxerManager;
+
+import static com.vily.videodemo1.MyApplication.H264_PLAY_PATH;
 
 public class AvcEncoder {
 
@@ -23,7 +35,11 @@ public class AvcEncoder {
     private MediaCodecInfo codecInfo;
     private static final String MIME_TYPE = "video/avc"; // H.264 Advanced Video
     private byte[] yuv420 = null;
-    private int count=0;
+    private int count = 0;
+    private int mTrackIndex;
+
+
+    private int mAudioTrackIndex;
 
     @SuppressLint("NewApi")
     public AvcEncoder(int width, int height, int framerate, int bitrate) {
@@ -39,8 +55,11 @@ public class AvcEncoder {
             mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
             mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, framerate);
 //            mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+
+
             mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, mColorFormat);
             mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);//关键帧间隔时间 单位s
+
             mediaCodec.configure(mediaFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             mediaCodec.start();
         } catch (IOException e) {
@@ -48,6 +67,7 @@ public class AvcEncoder {
         }
 
     }
+
     private static int getColorFormat(MediaCodecInfo mediaCodecInfo) {
         Log.i(TAG, "getColorFormat: ------sss");
         int matchedForamt = 0;
@@ -106,12 +126,13 @@ public class AvcEncoder {
     }
 
 
-
+    // 视频编码
     @SuppressLint("NewApi")
     public int offerEncoder(byte[] input, byte[] output) {
-
+        long startTime = System.nanoTime();
         int pos = 0;
         nV21ToNV12(input, yuv420, m_width, m_height);
+
         try {
             ByteBuffer[] inputBuffers = mediaCodec.getInputBuffers();
             ByteBuffer[] outputBuffers = mediaCodec.getOutputBuffers();
@@ -123,34 +144,34 @@ public class AvcEncoder {
                 ByteBuffer inputBuffer = inputBuffers[inputBufferIndex];
                 inputBuffer.clear();
                 inputBuffer.put(yuv420);
-                long timepts = 1000000*count / 20;
-                mediaCodec.queueInputBuffer(inputBufferIndex, 0, yuv420.length, timepts, 0);
+                long timepts = 1000000 * count / 20;
+                mediaCodec.queueInputBuffer(inputBufferIndex, 0, yuv420.length, timepts  , 0);
 
             }
             count++;
             MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
             int outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 0); // -1 一直等  0 不等
 
-            Log.i(TAG, "offerEncoder: -------------outputBufferIndex:"+outputBufferIndex);
+            Log.i(TAG, "offerEncoder: -------------outputBufferIndex:" + outputBufferIndex);
+            if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                MediaFormat mediaFormat = mediaCodec.getOutputFormat();
+                mTrackIndex = MediaMuxerManager.getInstance().addTrack(mediaFormat);
+                Log.i(TAG, "offerEncoder: ------走这里le吗");
+                MediaMuxerManager.getInstance().start();
+            }
             while (outputBufferIndex >= 0) {
                 ByteBuffer outputBuffer = outputBuffers[outputBufferIndex];
                 byte[] outData = new byte[bufferInfo.size];
-
                 outputBuffer.get(outData);
-
+                outputBuffer.position(bufferInfo.offset);
+                outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
                 if (m_info != null) {
                     System.arraycopy(outData, 0, output, pos, outData.length);
                     pos += outData.length;
 
                 } else {//保存pps sps 只有开始时 第一个帧里有， 保存起来后面用
-                    Log.i(TAG, "offerEncoder: ----------开始编码流吗1");
+
                     ByteBuffer spsPpsBuffer = ByteBuffer.wrap(outData);
-                    Log.v("xmc", "--------:outData:" + outData.length);
-                    Log.v("xmc", "----------:spsPpsBuffer:" + spsPpsBuffer);
-//	            	
-                    for (int i = 0; i < outData.length; i++) {
-                        Log.e("xmc333", "--------run: get data rtpData[i]=" + i + ":" + outData[i]);//输出SPS和PPS循环
-                    }
 
                     if (spsPpsBuffer.getInt() == 0x00000001) {
                         m_info = new byte[outData.length];
@@ -163,9 +184,15 @@ public class AvcEncoder {
                     System.arraycopy(m_info, 0, output, 0, m_info.length);
                     System.arraycopy(outData, 0, output, m_info.length, outData.length);
                 }
+
+
+                //  将编码后的数据写入到MP4复用器
+                MediaMuxerManager.getInstance().writeSampleData(mTrackIndex, outputBuffer, bufferInfo);
+
                 mediaCodec.releaseOutputBuffer(outputBufferIndex, false);
                 outputBufferIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
             }
+
 
         } catch (Throwable t) {
             t.printStackTrace();
@@ -173,6 +200,42 @@ public class AvcEncoder {
 
         return pos;
     }
+
+//    private File file;
+//    private FileOutputStream fileOutputStream = null;
+//    private void write2LocalFile(byte[] outData) {
+//
+//        try {
+//
+//
+//            if(file==null){
+//                file = new File(H264_PLAY_PATH);
+//            }
+//            if (!file.exists()) {
+//                file.createNewFile();
+//            }
+//
+//            fileOutputStream = new FileOutputStream(file);
+//
+//            fileOutputStream.write(outData);
+//
+//        } catch (FileNotFoundException e) {
+//            Log.e(TAG, "copyVideoResourceToMemory FileNotFoundException : " + e);
+//        } catch (IOException e) {
+//            Log.e(TAG, "copyVideoResourceToMemory IOException : " + e);
+//        } finally {
+//            try {
+//
+//                if(fileOutputStream!=null){
+//                    fileOutputStream.close();
+//                }
+//
+//            } catch (IOException e) {
+//                Log.e(TAG, "close stream IOException : " + e);
+//            }
+//
+//        }
+//    }
 
     //网友提供的，如果swapYV12toI420方法颜色不对可以试下这个方法，不同机型有不同的转码方式
     private void NV21toI420SemiPlanar(byte[] nv21bytes, byte[] i420bytes, int width, int height) {
@@ -213,7 +276,7 @@ public class AvcEncoder {
             nv12[framesize + j] = nv21[j + framesize - 1];
         }
 
-        yuv420=nv12;
+        yuv420 = nv12;
     }
 
 

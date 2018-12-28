@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.vily.videodemo1.Camer1.FocusSurfaceView
+        android:id="@+id/sv_surface1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        />
+
+    <com.vily.videodemo1.Camer1.FocusSurfaceView
+        android:id="@+id/sv_surface2"
+        android:layout_alignParentRight="true"
+
+        android:layout_margin="40dp"
+        android:layout_width="100dp"
+        android:background="@drawable/second_surface"
+        android:layout_height="150dp" />
+
+    <RelativeLayout
+        android:id="@+id/rl_top"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:id="@+id/iv_change_flash"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:layout_margin="7dp"
+            android:src="@mipmap/video_flash_close"/>
+        <ImageView
+            android:id="@+id/iv_change_camera"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="8dp"
+            android:layout_margin="7dp"
+            android:layout_alignParentRight="true"
+            android:src="@mipmap/video_camera"/>
+    </RelativeLayout>
+
+
+
+
+
+</RelativeLayout>

@@ -40,7 +40,7 @@ public class AudioRecorder extends Thread {
 			return;
 		}
 
-		mAudioRecord = new AudioRecord(android.media.MediaRecorder.AudioSource.MIC, mSampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, mMinBufferSize);
+		mAudioRecord = new AudioRecord(android.media.MediaRecorder.AudioSource.MIC,mSampleRate , AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, mMinBufferSize);
 		if (null == mAudioRecord) {
 			mMediaRecorder.onAudioError(MediaRecorderBase.AUDIO_RECORD_ERROR_CREATE_FAILED, "new AudioRecord failed.");
 			return;

@@ -73,12 +73,6 @@ public class MediaRecorderNative extends MediaRecorderBase implements MediaRecor
 		if (mOnErrorListener != null)
 			mOnErrorListener.onVideoError(what, extra);
 	}
-//
-//
-//	private byte[] h264 = new byte[MediaRecorderBase.VIDEO_WIDTH*MediaRecorderBase.VIDEO_HEIGHT*3/2];
-//	// getFramRate 每秒帧率    getBitRate 编码比特率
-//	private AvcEncoder avcCodec=new AvcEncoder(MediaRecorderBase.VIDEO_WIDTH,MediaRecorderBase.VIDEO_HEIGHT
-//			,getFramRate(),6000000);
 
 
 	/** 数据回调 */

@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.vily.videodemo1.Camer1.RecordedActivity;
+import com.vily.videodemo1.camera0.RecordActivity;
 import com.vily.videodemo1.camera2.MainActivity;
 import com.vily.videodemo1.media.MediaActivity;
 
@@ -43,12 +44,20 @@ public class HomeActivtiy extends AppCompatActivity implements View.OnClickListe
         btn_camera1.setOnClickListener(this);
         btn_camera2.setOnClickListener(this);
         mBtn_media_recorder.setOnClickListener(this);
+        findViewById(R.id.btn_camera1_0).setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
 
+            case R.id.btn_camera1_0:
+                if (initPermission()) {
+                    Intent intent = new Intent(HomeActivtiy.this, RecordActivity.class);
+
+                    startActivity(intent);
+                }
+                break;
             case R.id.btn_camera1:
                 if (initPermission()) {
                     Intent intent = new Intent(HomeActivtiy.this, RecordedActivity.class);
@@ -74,7 +83,7 @@ public class HomeActivtiy extends AppCompatActivity implements View.OnClickListe
                             1);
                 }
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                String path = "/storage/emulated/0/ssss.mp4";//该路径可以自定义
+                String path = "/storage/emulated/0/ganwu3.mp4";//该路径可以自定义
                 File file = new File(path);
                 Uri uri = Uri.fromFile(file);
                 intent.setDataAndType(uri, "video/*");

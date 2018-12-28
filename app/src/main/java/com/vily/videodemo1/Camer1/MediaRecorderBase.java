@@ -408,6 +408,7 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 
 		//设置自动连续对焦
 		String mode = getAutoFocusMode();
+		Log.i(TAG, "prepareCameraParaments: ---------对焦："+mode);
 		if (StringUtils.isNotEmpty(mode)) {
 			mParameters.setFocusMode(mode);
 		}

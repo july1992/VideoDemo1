@@ -4,8 +4,12 @@ import android.annotation.SuppressLint;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
+import android.media.MediaMuxer;
 import android.util.Log;
 
+import com.vily.videodemo1.manage.MediaMuxerManager;
+
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
@@ -18,6 +22,7 @@ public class AudioEncoder {
 
     private  MediaCodec mMediaCodec;
     private  MediaCodec.BufferInfo mBufferInfo;
+    private int mTrackIndex;
 
     public AudioEncoder() {
         try {
@@ -34,7 +39,10 @@ public class AudioEncoder {
         format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 2); //声道数（这里是数字）
         format.setInteger(MediaFormat.KEY_SAMPLE_RATE, 44100); //采样率
         format.setInteger(MediaFormat.KEY_BIT_RATE, 2048); //码率
+//        AACObjectLC    AMR_NB
         format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+
+
 
         //记录编码完成的buffer的信息
         mBufferInfo = new MediaCodec.BufferInfo();
@@ -65,6 +73,12 @@ public class AudioEncoder {
         do{
             outIndex=mMediaCodec.dequeueOutputBuffer(mInfo,0);//取出已经编码好的数据，outIndex 表示盒子的位置
             Log.i(TAG, "offEncoder: -----------outindex:"+outIndex);
+//            if (outIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+//                MediaFormat mediaFormat = mMediaCodec.getOutputFormat();
+//                mTrackIndex = MediaMuxerManager.getInstance().addTrack(mediaFormat);
+//                Log.i(TAG, "offerEncoder: ------走这里le吗");
+//                MediaMuxerManager.getInstance().start();
+//            }
             if(outIndex>=0){
                 ByteBuffer buffer=mMediaCodec.getOutputBuffer(outIndex);
                 buffer.position(mInfo.offset);
@@ -73,6 +87,11 @@ public class AudioEncoder {
                 pos=temp.length;
                 buffer.get(temp,7,mInfo.size);
                 addADTStoPacket(temp,temp.length,2048, 1);//temp是处理后的acc数据，你可以把temp存储成一个文件就是一个acc的音频文件
+
+
+                // 将音频写入mp4
+//                MediaMuxerManager.getInstance().writeSampleData(mTrackIndex, buffer, mInfo);
+
                 mMediaCodec.releaseOutputBuffer(outIndex,false);
             }else if(outIndex ==MediaCodec.INFO_TRY_AGAIN_LATER){
                 //TODO something
