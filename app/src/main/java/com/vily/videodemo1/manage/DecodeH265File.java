@@ -1,6 +1,8 @@
 package com.vily.videodemo1.manage;
 
 
+import android.util.Log;
+
 import com.vily.videodemo1.MyApplication;
 
 import java.io.File;
@@ -17,7 +19,7 @@ import java.util.List;
  * 解析H264文件类
  */
 
-public class DecodeH264File {
+public class DecodeH265File {
 
     private static final String TAG = "DecodeH264File";
 
@@ -35,22 +37,22 @@ public class DecodeH264File {
 
     private List<Byte> byteList = new ArrayList();
 
-    private static DecodeH264File instance;
+    private static DecodeH265File instance;
 
     private boolean isStartCode4;
 
-    public static DecodeH264File getInstance() {
+    public static DecodeH265File getInstance() {
         if (instance == null) {
-            instance = new DecodeH264File();
+            instance = new DecodeH265File();
         }
         return instance;
     }
 
-    public DecodeH264File() {
+    public DecodeH265File() {
         initInputStream();
     }
     private void initInputStream() {
-        File file = new File(MyApplication.H264_GanWu);
+        File file = new File(MyApplication.H265_GanWu);
         if (!file.exists()) {
             return;
         }

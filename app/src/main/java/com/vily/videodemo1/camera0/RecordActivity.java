@@ -1,42 +1,23 @@
 package com.vily.videodemo1.camera0;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.ImageFormat;
-import android.hardware.Camera;
-import android.hardware.Camera.Size;
-import android.media.MediaRecorder;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 
 import com.vily.videodemo1.Camer1.FocusSurfaceView;
-import com.vily.videodemo1.Camer1.MediaRecorderBase;
-import com.vily.videodemo1.Camer1.RecordedActivity;
 import com.vily.videodemo1.Camer1.utils.AudioEncoder;
 import com.vily.videodemo1.Camer1.utils.AvcEncoder;
-import com.vily.videodemo1.Camer1.utils.StringUtils;
 import com.vily.videodemo1.R;
-import com.vily.videodemo1.manage.DecoderManager;
 import com.vily.videodemo1.manage.MediaMuxerManager;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -45,7 +26,7 @@ import java.util.concurrent.Executors;
  * Created by zhangxd on 2018/9/5.
  */
 
-public class RecordActivity extends Activity {
+public class RecordActivity extends AppCompatActivity {
 
     private static final String TAG = RecordActivity.class.getSimpleName();
 
@@ -65,10 +46,11 @@ public class RecordActivity extends Activity {
     private SurfaceHolder mSurfaceHolder2;
     private Camera1Utils mCamera1Utils;
 
-    private static int VIDEO_With=720;
+    //  320*240    640*480  720*480
+    private static int VIDEO_With=640;
     private static int VIDEO_Height=480;
-    private static int BIT_RATE=800000;
-    private static int FRAME_RATE=20;
+    private static int BIT_RATE=60000;
+    private static int FRAME_RATE=25;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private ExecutorService audioExcutor = Executors.newSingleThreadExecutor();
@@ -80,6 +62,7 @@ public class RecordActivity extends Activity {
     private int afterCount=0;
     private AudioEncoder mAudioEncoder;
     private long mStartTime;
+    private float timeSecond=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +88,7 @@ public class RecordActivity extends Activity {
     private void initManager() {
         MediaMuxerManager.getInstance().init();
 
-        mCamera1Utils = Camera1Utils.getInstance(RecordActivity.this);
+        mCamera1Utils = Camera1Utils.getInstance(RecordActivity.this,VIDEO_With,VIDEO_Height);
         mWidth = getWindowManager().getDefaultDisplay().getWidth();
         mHeight = getWindowManager().getDefaultDisplay().getHeight();
 
@@ -125,15 +108,8 @@ public class RecordActivity extends Activity {
             public void surfaceCreated(SurfaceHolder holder) {
 
                 Log.i(TAG, "surfaceCreated: ---------播放直播对方的画面");
-                // 开线程解码
-                playExcutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        // 解析本地的h264视频文件
-//                        DecoderManager.getInstance().startH264Decode(mWidth,mHeight,mSurfaceHolder2);
-//                        DecoderManager.getInstance().playDecode();
-                    }
-                });
+
+
 
             }
 
@@ -175,10 +151,24 @@ public class RecordActivity extends Activity {
     }
     private void initLietener() {
 
+        Timer timer=new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(afterCount>0){
+                    Log.i(TAG, "run: ---------每秒："+afterCount+"byte"+"----"+afterCount*8/1024+"kb");
+                }
+
+                afterCount=0;
+
+            }
+        }, 0,1000);
+
+
         mIv_change_flash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (Camera1Utils.getInstance(RecordActivity.this).changeFlash()) {
+                if (Camera1Utils.getInstance(RecordActivity.this, VIDEO_With, VIDEO_Height).changeFlash()) {
                     mIv_change_flash.setImageResource(R.mipmap.video_flash_open);
                 } else {
                     mIv_change_flash.setImageResource(R.mipmap.video_flash_close);
@@ -189,7 +179,7 @@ public class RecordActivity extends Activity {
         mIv_change_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Camera1Utils.getInstance(RecordActivity.this).switchCamera();
+                Camera1Utils.getInstance(RecordActivity.this, VIDEO_With, VIDEO_Height).switchCamera();
                 mIv_change_flash.setImageResource(R.mipmap.video_flash_close);
             }
         });
@@ -200,7 +190,7 @@ public class RecordActivity extends Activity {
                 switch (tag) {
 
                     case "big":
-                        tag = "small"; // 切换到小屏
+                        tag = "small"; // 切换到小屏   闪的原因是定格在最后一帧 切换画面
 
                         mCamera1Utils.destroyCamera();
 
@@ -256,12 +246,19 @@ public class RecordActivity extends Activity {
 
                         afterCount+=pos;
                         Log.i(TAG, "run: -----------视频:"+pos+"------bytes1:"+bytes1.length+"-----afterCount:"+afterCount+"----编码"+(System.currentTimeMillis()-mStartTime));
+
+
                     }
                 });
+
+
+
+
             }
         });
 
     }
+
 
     @Override
     protected void onPause() {
@@ -308,7 +305,7 @@ public class RecordActivity extends Activity {
         mCamera1Utils.destroyCamera();
         mCamera1Utils.stopRecord();
 
-        MediaMuxerManager.getInstance().close();
+//        MediaMuxerManager.getInstance().close();
     }
 
 

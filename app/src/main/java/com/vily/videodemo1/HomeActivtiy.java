@@ -17,6 +17,7 @@ import com.vily.videodemo1.Camer1.RecordedActivity;
 import com.vily.videodemo1.camera0.RecordActivity;
 import com.vily.videodemo1.camera2.MainActivity;
 import com.vily.videodemo1.media.MediaActivity;
+import com.vily.videodemo1.playH264.PlayH264Activtiy;
 
 import java.io.File;
 
@@ -45,6 +46,7 @@ public class HomeActivtiy extends AppCompatActivity implements View.OnClickListe
         btn_camera2.setOnClickListener(this);
         mBtn_media_recorder.setOnClickListener(this);
         findViewById(R.id.btn_camera1_0).setOnClickListener(this);
+        findViewById(R.id.btn_media_recorder2).setOnClickListener(this);
     }
 
     @Override
@@ -88,6 +90,14 @@ public class HomeActivtiy extends AppCompatActivity implements View.OnClickListe
                 Uri uri = Uri.fromFile(file);
                 intent.setDataAndType(uri, "video/*");
                 startActivity(intent);
+
+                break;
+            case R.id.btn_media_recorder2:
+                if (initPermission()) {
+                    Intent intent2 = new Intent(HomeActivtiy.this, PlayH264Activtiy.class);
+
+                    startActivity(intent2);
+                }
 
                 break;
             default:

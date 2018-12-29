@@ -23,6 +23,8 @@ public class MyApplication extends Application {
     public static final String MP4_PLAY_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/video.mp4";
 
     public static  String H264_PLAY_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() +"/test.h264";
+    public static  String H264_GanWu = Environment.getExternalStorageDirectory().getAbsolutePath() +"/ganwu.h264";
+    public static  String H265_GanWu = Environment.getExternalStorageDirectory().getAbsolutePath() +"/ganwu.HEVC";
 
 
     @Override

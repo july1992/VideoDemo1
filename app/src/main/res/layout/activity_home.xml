@@ -28,6 +28,12 @@
         android:id="@+id/btn_media_recorder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="播放视频"
+        android:text="播放mp4视频"
+        android:layout_marginTop="20dp"/>
+    <Button
+        android:id="@+id/btn_media_recorder2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="播放h265视频"
         android:layout_marginTop="20dp"/>
 </LinearLayout>

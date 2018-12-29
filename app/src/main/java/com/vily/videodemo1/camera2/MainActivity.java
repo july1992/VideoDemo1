@@ -38,7 +38,12 @@ import static android.media.MediaFormat.KEY_COLOR_FORMAT;
 import static android.media.MediaFormat.KEY_FRAME_RATE;
 import static android.media.MediaFormat.KEY_I_FRAME_INTERVAL;
 import static android.media.MediaFormat.KEY_MAX_INPUT_SIZE;
-
+/**
+ *  * description : 
+ *  * Author : Vily
+ *  * Date : 2018/12/22
+ *  
+ **/
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";

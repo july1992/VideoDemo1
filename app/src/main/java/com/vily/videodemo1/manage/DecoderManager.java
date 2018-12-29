@@ -14,6 +14,8 @@ import com.vily.videodemo1.camera0.RecordActivity;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by zhangxd on 2018/7/6.
@@ -40,7 +42,7 @@ public class DecoderManager {
 
     private SpeedManager mSpeedController = new SpeedManager();
 
-
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
     private DecoderManager() {
     }
 
@@ -63,9 +65,10 @@ public class DecoderManager {
         while (!isDecodeFinish) {
             if (mediaCodec != null) {
                 int inputIndex = mediaCodec.dequeueInputBuffer(-1);
+                Log.i(TAG, "playDecode: --------inputIndex:"+inputIndex);
                 if (inputIndex >= 0) {
                     ByteBuffer byteBuffer = mediaCodec.getInputBuffer(inputIndex);
-                    int sampSize = DecodeH264File.getInstance().readSampleData(byteBuffer);
+                    int sampSize = DecodeH265File.getInstance().readSampleData(byteBuffer);
                     long time = (System.nanoTime() - startTime) / 1000;
                     if (sampSize > 0 && time > 0) {
                         mediaCodec.queueInputBuffer(inputIndex, 0, sampSize, time, 0);
@@ -76,6 +79,7 @@ public class DecoderManager {
             }
             BufferInfo bufferInfo = new BufferInfo();
             int outIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 0);
+            Log.i(TAG, "playDecode: ---------outIndex:"+outIndex);
             if (outIndex >= 0) {
                 mediaCodec.releaseOutputBuffer(outIndex, true);
             }
@@ -106,21 +110,21 @@ public class DecoderManager {
     public void startH264Decode(int width, int height, SurfaceHolder surfaceHolder2) {
         Log.i(TAG, "startH264Decode: ---------初始化解码");
         try {
-            mediaCodec = MediaCodec.createDecoderByType("video/avc");
-            mediaFormat = MediaFormat.createVideoFormat("video/avc", width, height);
-            mediaExtractor = new MediaExtractor();
-            //MP4 文件存放位置
-            mediaExtractor.setDataSource(MyApplication.MP4_PLAY_PATH);
-            Log.d(TAG, "getTrackCount: " + mediaExtractor.getTrackCount());
-            for (int i = 0; i < mediaExtractor.getTrackCount(); i++) {
-                MediaFormat format = mediaExtractor.getTrackFormat(i);
-                String mime = format.getString(MediaFormat.KEY_MIME);
-                Log.d(TAG, "mime: " + mime);
-                if (mime.startsWith("video")) {
-                    mediaFormat = format;
-                    mediaExtractor.selectTrack(i);
-                }
-            }
+            mediaCodec = MediaCodec.createDecoderByType("video/HEVC");
+            mediaFormat = MediaFormat.createVideoFormat("video/HEVC", width, height);
+//            mediaExtractor = new MediaExtractor();
+//            //MP4 文件存放位置
+//            mediaExtractor.setDataSource(MyApplication.H265_GanWu);
+//            Log.d(TAG, "getTrackCount: " + mediaExtractor.getTrackCount());
+//            for (int i = 0; i < mediaExtractor.getTrackCount(); i++) {
+//                MediaFormat format = mediaExtractor.getTrackFormat(i);
+//                String mime = format.getString(MediaFormat.KEY_MIME);
+//                Log.d(TAG, "mime: " + mime);
+//                if (mime.startsWith("video")) {
+//                    mediaFormat = format;
+//                    mediaExtractor.selectTrack(i);
+//                }
+//            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -128,6 +132,13 @@ public class DecoderManager {
         mediaCodec.configure(mediaFormat, surfaceHolder2.getSurface(), null, 0);
         mediaCodec.start();
         Log.i(TAG, "startH264Decode: -----------初始化解码完成");
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                playDecode();
+            }
+        });
     }
 
 }

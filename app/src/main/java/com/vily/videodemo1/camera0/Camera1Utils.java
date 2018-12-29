@@ -13,16 +13,14 @@ import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
-import com.vily.videodemo1.Camer1.AudioRecorder;
 import com.vily.videodemo1.Camer1.utils.DeviceUtils;
 import com.vily.videodemo1.Camer1.utils.StringUtils;
-import com.vily.videodemo1.camera2.Camera2Utils;
 
 import java.io.IOException;
 import java.util.List;
 
 /**
- *  * description : 
+ *  * description : camera1 工具类
  *  * Author : Vily
  *  * Date : 2018/12/27
  *  
@@ -41,10 +39,12 @@ public class Camera1Utils implements Camera.PreviewCallback {
 
     private static Camera1Utils mCamera1Utils;
 
-    private int mCameraId=0;
+    private int mCameraId=0;  // 0是后置camera  1是前置camera
 
     private SurfaceHolder mSurfaceHolder;
     private AudioRecorder0 mAudioRecorder;
+    private static int mWith=720;
+    private static int mHeight=480;
 
     public Camera1Utils() {
     }
@@ -53,61 +53,54 @@ public class Camera1Utils implements Camera.PreviewCallback {
         mContext = context;
     }
 
-    public static Camera1Utils getInstance(Context context){
+    public static Camera1Utils getInstance(Context context, int VIDEO_With, int VIDEO_Height){
 
         if(mCamera1Utils==null){
 
             mCamera1Utils=new Camera1Utils(context);
         }
+        mWith=VIDEO_With;
+        mHeight=VIDEO_Height;
 
         return mCamera1Utils;
 
     }
 
+    // 初始化照相机
     public void initCamera(SurfaceHolder surfaceHolder){
 
         mSurfaceHolder=surfaceHolder;
         mCamera = Camera.open(mCameraId);
-
         setCameraDisplayOrientation();
-
         parameters = mCamera.getParameters();
         parameters.setPreviewFormat(ImageFormat.NV21);
-
         String mode = getAutoFocusMode();
         if (StringUtils.isNotEmpty(mode)) {
             parameters.setFocusMode(mode);
         }
-
         if (isSupported(parameters.getSupportedWhiteBalance(), "auto"))
             parameters.setWhiteBalance("auto");
-
         //是否支持视频防抖
         if ("true".equals(parameters.get("video-stabilization-supported")))
             parameters.set("video-stabilization", "true");
-
         if (!DeviceUtils.isDevice("GT-N7100", "GT-I9308", "GT-I9300")) {
             parameters.set("cam_mode", 1);
             parameters.set("cam-mode", 1);
         }
         List<Camera.Size> mSizeList = parameters.getSupportedPreviewSizes();
         mSize = mSizeList.get(1);
-
         Size bestPreview = getBestPreview(mSizeList);
-
         for(Camera.Size size:mSizeList){
             Log.i(TAG, "initCamera: -----------size:"+size.width+"---"+size.height);
         }
-
         Log.i(TAG, "initCamera: ----------bestPreview:"+bestPreview.getHeight()+"----w:"+bestPreview.getWidth());
-
-        parameters.setPreviewSize(720, 480);
+        parameters.setPreviewSize(mWith, mHeight);
         List<Camera.Size> supportedPictureSizes = parameters.getSupportedPictureSizes();
         for(Camera.Size size:supportedPictureSizes){
             Log.i(TAG, "supportedPictureSizes: -----------size:"+size.width+"---"+size.height);
         }
 
-        parameters.setPreviewFrameRate(15);
+        parameters.setPreviewFrameRate(25);
         mCamera.setParameters(parameters);
         try {
             mCamera.setPreviewDisplay(surfaceHolder);
@@ -118,6 +111,7 @@ public class Camera1Utils implements Camera.PreviewCallback {
         mCamera.setPreviewCallback(this);
     }
 
+    // 获取最好的preview
     private Size getBestPreview(List<Camera.Size> sizes) {
         Display display =((RecordActivity)mContext).getWindowManager().getDefaultDisplay();
         int screenWidth = display.getWidth();
@@ -145,10 +139,8 @@ public class Camera1Utils implements Camera.PreviewCallback {
                 minB=b[i];
             }
         }
-
         int width = sizes.get(minW).width;
         int height = sizes.get(minH).height;
-
         return new Size(width,height);
 
     }
@@ -173,6 +165,7 @@ public class Camera1Utils implements Camera.PreviewCallback {
     private boolean isSupported(List<String> list, String key) {
         return list != null && list.contains(key);
     }
+    // 因为默认是横着的，所以要旋转
     private void setCameraDisplayOrientation() {
         Display mDisplay =((RecordActivity)mContext).getWindowManager().getDefaultDisplay();
         int orientation = mDisplay.getOrientation();
@@ -211,8 +204,6 @@ public class Camera1Utils implements Camera.PreviewCallback {
         return mSize;
     }
 
-
-
     //   是否支持前置摄像头
     @SuppressLint("NewApi")
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
@@ -228,7 +219,7 @@ public class Camera1Utils implements Camera.PreviewCallback {
     }
 
 
-
+    //  闪光灯
     public boolean changeFlash() {
         boolean flashOn = false;
         if (flashEnable(mContext)) {
@@ -245,6 +236,7 @@ public class Camera1Utils implements Camera.PreviewCallback {
         return flashOn;
     }
 
+    //  闪光灯是否可用
     public boolean flashEnable(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
                 && mCameraId == Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -273,7 +265,7 @@ public class Camera1Utils implements Camera.PreviewCallback {
     }
 
 
-
+    // 销毁camera 不然其他设备不能用
     public void destroyCamera() {
         if (mCamera != null) {
             mCamera.setPreviewCallback(null);
@@ -291,7 +283,7 @@ public class Camera1Utils implements Camera.PreviewCallback {
     }
 
 
-
+    // 获取预览帧
     @Override
     public void onPreviewFrame(byte[] bytes, Camera camera) {
 

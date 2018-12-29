@@ -42,14 +42,7 @@ public class AutoFitTextureView extends TextureView {
         super(context, attrs, defStyle);
     }
 
-    /**
-     * Sets the aspect ratio for this view. The size of the view will be measured based on the ratio
-     * calculated from the parameters. Note that the actual sizes of parameters don't matter, that
-     * is, calling setAspectRatio(2, 3) and setAspectRatio(4, 6) make the same result.
-     *
-     * @param width  Relative horizontal size
-     * @param height Relative vertical size
-     */
+
     public void setAspectRatio(int width, int height) {
         if (width < 0 || height < 0) {
             throw new IllegalArgumentException("Size cannot be negative.");
@@ -66,21 +59,21 @@ public class AutoFitTextureView extends TextureView {
         int height = MeasureSpec.getSize(heightMeasureSpec);
 
         Log.i("", "onMeasure: -----------mRatioWidth:"+mRatioWidth+"-----mRatioHeight:"+mRatioHeight+"-----width:"+width+"----height:"+height);
-//        if (0 == mRatioWidth || 0 == mRatioHeight) {
-//            setMeasuredDimension(width, height);
-//        } else {
-//            if (width < height * mRatioWidth / mRatioHeight) {
-//                setMeasuredDimension(width, width * mRatioHeight / mRatioWidth);
-//            } else {
-//                setMeasuredDimension(height * mRatioWidth / mRatioHeight, height);
-//            }
-//        }
-        if(mRatioWidth==320 && mRatioHeight==480){
-            setMeasuredDimension(mRatioWidth,mRatioHeight);
-        }else{
-
-            setMeasuredDimension(widthMeasureSpec,heightMeasureSpec);
+        if (0 == mRatioWidth || 0 == mRatioHeight) {
+            setMeasuredDimension(width, height);
+        } else {
+            if (width < height * mRatioWidth / mRatioHeight) {
+                setMeasuredDimension(width, width * mRatioHeight / mRatioWidth);
+            } else {
+                setMeasuredDimension(height * mRatioWidth / mRatioHeight, height);
+            }
         }
+//        if(mRatioWidth==320 && mRatioHeight==480){
+//            setMeasuredDimension(mRatioWidth,mRatioHeight);
+//        }else{
+//
+//            setMeasuredDimension(widthMeasureSpec,heightMeasureSpec);
+//        }
 
 
     }

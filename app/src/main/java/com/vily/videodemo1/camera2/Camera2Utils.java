@@ -312,6 +312,7 @@ public class Camera2Utils {
         }
     }
 
+    @SuppressLint("NewApi")
     public void openCamera() {
         if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -326,6 +327,21 @@ public class Camera2Utils {
             if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
+            manager.registerTorchCallback(new CameraManager.TorchCallback() {
+                @Override
+                public void onTorchModeUnavailable(@NonNull String cameraId) {
+                    super.onTorchModeUnavailable(cameraId);
+
+                    Log.i(TAG, "onTorchModeUnavailable: --------"+cameraId);
+                }
+
+                @Override
+                public void onTorchModeChanged(@NonNull String cameraId, boolean enabled) {
+                    super.onTorchModeChanged(cameraId, enabled);
+
+                    Log.i(TAG, "onTorchModeChanged: ------"+cameraId+"---"+enabled);
+                }
+            },null );
             manager.openCamera(mCameraId, mStateCallback, mBackgroundHandler);
 
         } catch (CameraAccessException e) {
@@ -382,7 +398,7 @@ public class Camera2Utils {
             assert texture != null;
 
             // We configure the size of default buffer to be the size of camera preview we want.
-            texture.setDefaultBufferSize(mTextureView.getWidth(), mTextureView.getHeight());
+//            texture.setDefaultBufferSize(mTextureView.getWidth(), mTextureView.getHeight());
 
             // This is the output Surface we need to start preview.
             Surface surface = new Surface(texture);
@@ -409,11 +425,11 @@ public class Camera2Utils {
                                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
                                         CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
                                 // 设置自动曝光模式
-                                if (mFlashSupported) {
-                                    // 设置自动曝光模式
-                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
-                                            CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-                                }
+//                                if (mFlashSupported) {
+//                                    // 设置自动曝光模式
+//                                    mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE,
+//                                            CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+//                                }
 
                                 // Finally, we start displaying the camera preview.
                                 mPreviewRequest = mPreviewRequestBuilder.build();
@@ -511,20 +527,23 @@ public class Camera2Utils {
     // 打开闪光灯
     @SuppressLint("NewApi")
     public void openFlash() {
-        if(manager!=null){
+        if (manager != null) {
             try {
-                manager.setTorchMode(mCameraId,true);
+                Log.i(TAG, "openFlash: ----------开启闪光灯");
+                manager.setTorchMode(mCameraId, true);
             } catch (CameraAccessException e) {
                 e.printStackTrace();
             }
         }
     }
+
     // 关闭闪光灯
     @SuppressLint("NewApi")
-    public void closeFlash(){
-        if(manager!=null){
+    public void closeFlash() {
+        if (manager != null) {
             try {
-                manager.setTorchMode(mCameraId,false);
+                Log.i(TAG, "closeFlash: -----------关闭闪光灯流吗");
+                manager.setTorchMode(mCameraId, false);
             } catch (CameraAccessException e) {
                 e.printStackTrace();
             }
