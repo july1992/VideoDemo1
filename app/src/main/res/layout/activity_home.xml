@@ -36,4 +36,12 @@
         android:layout_height="wrap_content"
         android:text="播放h265视频"
         android:layout_marginTop="20dp"/>
+
+
+    <Button
+        android:id="@+id/video_audio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="音视频流"
+        android:layout_marginTop="20dp"/>
 </LinearLayout>

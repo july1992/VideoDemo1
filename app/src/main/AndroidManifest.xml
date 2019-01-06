@@ -39,7 +39,8 @@
             android:screenOrientation="portrait"/>
         <activity android:name=".media.MediaActivity" />
         <activity android:name=".camera0.RecordActivity" />
-        <activity android:name=".playH264.PlayH264Activtiy" />
+        <activity android:name=".playH265.PlayH265Activtiy" />
+        <activity android:name=".LivePushActivity"/>
 
     </application>
 
