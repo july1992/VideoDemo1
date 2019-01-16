@@ -31,7 +31,6 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
 
     private SurfaceView testSurfaceView;
 
-    private TextureView textureView;
 
     private SurfaceHolder holder;
     //文件路径
@@ -60,11 +59,9 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
 
     int frameNum;
 
-    boolean findFlag = false;
-
-
     private boolean isExit = false;
     private DecoderThread mDecoderThread;
+    private CameraRecordDecoder mCameraRecordDecoder;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -76,7 +73,7 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
         holder = testSurfaceView.getHolder();
         holder.addCallback(this);
 
-        textureView = findViewById(R.id.textureview);
+
 
 
         Button btn = findViewById(R.id.takePhoto);
@@ -96,17 +93,19 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        width = holder.getSurfaceFrame().width();
-        height = holder.getSurfaceFrame().height();
+//        width = holder.getSurfaceFrame().width();
+//        height = holder.getSurfaceFrame().height();
         Log.i(TAG, "surfaceCreated:  width = " + width + ", height = " + height);
-        startCodec0();
+//        startCodec0();
+
+        mCameraRecordDecoder = new CameraRecordDecoder();
+        mCameraRecordDecoder.initCameraDecode(320,240,holder);
 
 
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        stopCodec0();
 
     }
 
@@ -117,8 +116,13 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
 //            doDecoder();
             //doDecodec();
 
-            mDecoderThread = new DecoderThread();
-            mDecoderThread.start();
+//            mDecoderThread = new DecoderThread();
+//            mDecoderThread.start();
+
+            if(mCameraRecordDecoder!=null){
+                mCameraRecordDecoder.decodeStart(path0);
+            }
+
         }
     }
 
@@ -274,7 +278,7 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
 
         private File file = null;
         private boolean findFlag = false;
-        private boolean exit=false;   //是否退出编码
+
 
         public DecoderThread( ) {
             file = new File(path0);
@@ -285,9 +289,6 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
 
         }
 
-        public void isExit(){
-//            exit=true;
-        }
         @Override
         public void run() {
             super.run();
@@ -343,7 +344,8 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
                                         break;
                                     }
                                 }
-                                if (findFlag && !exit) {
+
+                                if (findFlag && !isFinish0) {
                                     nalu.type = (frame[i + 3] & 0x7E) >> 1;
                                     if (index == 1) {
                                         i = i - 1;
@@ -352,6 +354,7 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
                                         pos = pos - 1;
                                     }
 
+                                    Log.i(TAG, "run: ---------findflag:"+findFlag+"------isfinish:"+isFinish0);
                                     onFrame(frame, i, pos - i); // start code + nalu 送解码器
                                     i = pos;
                                     writelen = i;
@@ -398,45 +401,34 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
 
 
     public void stopCodec0() {
-        isExit=true;
+        //  放在 mCodec0.stop(); 前面  不然会报错
         if(mDecoderThread!=null){
-            mDecoderThread.isExit();
             mDecoderThread=null;
         }
-        try {
-            mCodec0.stop();
-            mCodec0.release();
-            mCodec0 = null;
-            isFirst0 = true;
-            isFinish0 = true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            mCodec0 = null;
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        isExit = true;  // 退出
-        if(mDecoderThread!=null){
-            mDecoderThread.isExit();
-            mDecoderThread=null;
-        }
-
-        if (mCodec0 != null) {
+        if(mCodec0!=null){
             try {
                 mCodec0.stop();
-                mCodec0.release();
-                mCodec0 = null;
+
+                isExit=true;
                 isFirst0 = true;
                 isFinish0 = true;
+                mCodec0.release();
+                mCodec0 = null;
+
             } catch (Exception e) {
                 e.printStackTrace();
                 mCodec0 = null;
             }
         }
 
-
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        stopCodec0();
+
+        mCameraRecordDecoder.onDestroy();
+    }
+
 }

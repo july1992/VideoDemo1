@@ -15,8 +15,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 
-public class WlShaderUtil {
+public class ShaderUtil {
 
+    private static final String TAG = "ShaderUtil";
     public static String getRawResource(Context context, int rawId)
     {
         InputStream inputStream = context.getResources().openRawResource(rawId);
@@ -50,7 +51,7 @@ public class WlShaderUtil {
             GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compile, 0);
             if(compile[0] != GLES20.GL_TRUE)
             {
-                Log.d("ywl5320", "shader compile error");
+                Log.d(TAG, "shader compile error");
                 GLES20.glDeleteShader(shader);
                 shader = 0;
             }

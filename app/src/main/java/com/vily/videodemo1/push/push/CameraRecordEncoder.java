@@ -8,7 +8,7 @@ import android.util.Log;
 import android.view.Surface;
 
 import com.vily.videodemo1.push.egl.EglHelper;
-import com.vily.videodemo1.push.egl.WLEGLSurfaceView;
+import com.vily.videodemo1.push.egl.EGLSurfaceView;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -16,33 +16,35 @@ import java.nio.ByteBuffer;
 
 import javax.microedition.khronos.egl.EGLContext;
 
-public abstract class WlBasePushEncoder {
+public class CameraRecordEncoder {
 
-    private static final String TAG = "WlBasePushEncoder";
+    private static final String TAG = "CameraRecordEncoder";
 
     private Surface surface;
     private EGLContext eglContext;
 
     private int width;
     private int height;
+    private int bit_rate=80000;
+    private int framrate=25;
 
     private MediaCodec videoEncodec;
     private MediaFormat videoFormat;
     private MediaCodec.BufferInfo videoBufferinfo;
 
-    private MediaCodec audioEncodec;
-    private MediaFormat audioFormat;
-    private MediaCodec.BufferInfo audioBufferinfo;
-    private long audioPts = 0;
-    private int sampleRate;
+//    private MediaCodec audioEncodec;
+//    private MediaFormat audioFormat;
+//    private MediaCodec.BufferInfo audioBufferinfo;
+//    private long audioPts = 0;
+//    private int sampleRate;
 
     private WlEGLMediaThread wlEGLMediaThread;
     private VideoEncodecThread videoEncodecThread;
-    private AudioEncodecThread audioEncodecThread;
-    private WlAudioRecordUitl wlAudioRecordUitl;
+//    private AudioEncodecThread audioEncodecThread;
+//    private WlAudioRecordUitl wlAudioRecordUitl;
 
 
-    private WLEGLSurfaceView.WlGLRender wlGLRender;
+    private EGLSurfaceView.WlGLRender wlGLRender;
 
     public final static int RENDERMODE_WHEN_DIRTY = 0;
     public final static int RENDERMODE_CONTINUOUSLY = 1;
@@ -50,11 +52,16 @@ public abstract class WlBasePushEncoder {
 
     private OnMediaInfoListener onMediaInfoListener;
 
+    public CameraRecordEncoder(){
 
-    public WlBasePushEncoder(Context context) {
+    }
+    public CameraRecordEncoder(Context context, int textureId) {
+        CameraRecordRender wlEncodecPushRender = new CameraRecordRender(context, textureId);
+        setRender(wlEncodecPushRender);
+        setmRenderMode(CameraRecordEncoder.RENDERMODE_CONTINUOUSLY);
     }
 
-    public void setRender(WLEGLSurfaceView.WlGLRender wlGLRender) {
+    public void setRender(EGLSurfaceView.WlGLRender wlGLRender) {
         this.wlGLRender = wlGLRender;
     }
 
@@ -85,31 +92,31 @@ public abstract class WlBasePushEncoder {
         {
 
             Log.i(TAG, "startRecord: ---------------开始录制");
-            audioPts = 0;
+//            audioPts = 0;
 
-            wlEGLMediaThread = new WlEGLMediaThread(new WeakReference<WlBasePushEncoder>(this));
-            videoEncodecThread = new VideoEncodecThread(new WeakReference<WlBasePushEncoder>(this));
-            audioEncodecThread = new AudioEncodecThread(new WeakReference<WlBasePushEncoder>(this));
+            wlEGLMediaThread = new WlEGLMediaThread(new WeakReference<CameraRecordEncoder>(this));
+            videoEncodecThread = new VideoEncodecThread(new WeakReference<CameraRecordEncoder>(this));
+//            audioEncodecThread = new AudioEncodecThread(new WeakReference<CameraRecordEncoder>(this));
             wlEGLMediaThread.isCreate = true;
             wlEGLMediaThread.isChange = true;
             wlEGLMediaThread.start();
             videoEncodecThread.start();
-            audioEncodecThread.start();
-            wlAudioRecordUitl.startRecord();
+//            audioEncodecThread.start();
+//            wlAudioRecordUitl.startRecord();
         }
     }
 
     public void stopRecord()
     {
-        if(wlEGLMediaThread != null && videoEncodecThread != null && audioEncodecThread != null)
+        if(wlEGLMediaThread != null && videoEncodecThread != null )
         {
-            wlAudioRecordUitl.stopRecord();
+//            wlAudioRecordUitl.stopRecord();
             videoEncodecThread.exit();
-            audioEncodecThread.exit();
+//            audioEncodecThread.exit();
             wlEGLMediaThread.onDestory();
             videoEncodecThread = null;
             wlEGLMediaThread = null;
-            audioEncodecThread = null;
+//            audioEncodecThread = null;
         }
     }
 
@@ -117,23 +124,23 @@ public abstract class WlBasePushEncoder {
     {
         Log.i(TAG, "initMediaEncodec: ------------------hhhhh");
         initVideoEncodec(MediaFormat.MIMETYPE_VIDEO_HEVC, width, height);
-        initAudioEncodec(MediaFormat.MIMETYPE_AUDIO_AAC, sampleRate, channelCount);
-        initPCMRecord();
+//        initAudioEncodec(MediaFormat.MIMETYPE_AUDIO_AAC, sampleRate, channelCount);
+//        initPCMRecord();
     }
 
-    private void initPCMRecord()
-    {
-        wlAudioRecordUitl = new WlAudioRecordUitl();
-        wlAudioRecordUitl.setOnRecordLisener(new WlAudioRecordUitl.OnRecordLisener() {
-            @Override
-            public void recordByte(byte[] audioData, int readSize) {
-                if(wlAudioRecordUitl.isStart())
-                {
-                    putPCMData(audioData, readSize);
-                }
-            }
-        });
-    }
+//    private void initPCMRecord()
+//    {
+//        wlAudioRecordUitl = new WlAudioRecordUitl();
+//        wlAudioRecordUitl.setOnRecordLisener(new WlAudioRecordUitl.OnRecordLisener() {
+//            @Override
+//            public void recordByte(byte[] audioData, int readSize) {
+//                if(wlAudioRecordUitl.isStart())
+//                {
+//                    putPCMData(audioData, readSize);
+//                }
+//            }
+//        });
+//    }
 
 
     private void initVideoEncodec(String mimeType, int width, int height)
@@ -142,8 +149,8 @@ public abstract class WlBasePushEncoder {
             videoBufferinfo = new MediaCodec.BufferInfo();
             videoFormat = MediaFormat.createVideoFormat(mimeType, width, height);
             videoFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-            videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, width * height);
-            videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, 25);
+            videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, bit_rate);
+            videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, framrate);
             videoFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
 
             videoEncodec = MediaCodec.createEncoderByType(mimeType);
@@ -161,46 +168,47 @@ public abstract class WlBasePushEncoder {
 
     }
 
-    private void initAudioEncodec(String mimeType, int sampleRate, int channelCount)
-    {
-        try {
-            this.sampleRate = sampleRate;
-            audioBufferinfo = new MediaCodec.BufferInfo();
-            audioFormat = MediaFormat.createAudioFormat(mimeType, sampleRate, channelCount);
-            audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
-            audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-            audioFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 4096 * 10);
+//    private void initAudioEncodec(String mimeType, int sampleRate, int channelCount)
+//    {
+//        try {
+//            this.sampleRate = sampleRate;
+//            audioBufferinfo = new MediaCodec.BufferInfo();
+//            audioFormat = MediaFormat.createAudioFormat(mimeType, sampleRate, channelCount);
+//            audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
+//            audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
+//            audioFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 4096 * 10);
+//
+//            audioEncodec = MediaCodec.createEncoderByType(mimeType);
+//            audioEncodec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            audioBufferinfo = null;
+//            audioFormat = null;
+//            audioEncodec = null;
+//        }
+//    }
+//
+//    public void putPCMData(byte[] buffer, int size)
+//    {
+//        if(audioEncodecThread != null && !audioEncodecThread.isExit && buffer != null && size > 0)
+//        {
+//            int inputBufferindex = audioEncodec.dequeueInputBuffer(0);
+//            if(inputBufferindex >= 0)
+//            {
+//                ByteBuffer byteBuffer = audioEncodec.getInputBuffers()[inputBufferindex];
+//                byteBuffer.clear();
+//                byteBuffer.put(buffer);
+//                long pts = getAudioPts(size, sampleRate);
+//                audioEncodec.queueInputBuffer(inputBufferindex, 0, size, pts, 0);
+//            }
+//        }
+//    }
 
-            audioEncodec = MediaCodec.createEncoderByType(mimeType);
-            audioEncodec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            audioBufferinfo = null;
-            audioFormat = null;
-            audioEncodec = null;
-        }
-    }
-
-    public void putPCMData(byte[] buffer, int size)
-    {
-        if(audioEncodecThread != null && !audioEncodecThread.isExit && buffer != null && size > 0)
-        {
-            int inputBufferindex = audioEncodec.dequeueInputBuffer(0);
-            if(inputBufferindex >= 0)
-            {
-                ByteBuffer byteBuffer = audioEncodec.getInputBuffers()[inputBufferindex];
-                byteBuffer.clear();
-                byteBuffer.put(buffer);
-                long pts = getAudioPts(size, sampleRate);
-                audioEncodec.queueInputBuffer(inputBufferindex, 0, size, pts, 0);
-            }
-        }
-    }
-
+    // 将通过 surface = videoEncodec.createInputSurface(); 获取到到suface渲染出去
     static class WlEGLMediaThread extends Thread
     {
-        private WeakReference<WlBasePushEncoder> encoder;
+        private WeakReference<CameraRecordEncoder> encoder;
         private EglHelper eglHelper;
         private Object object;
 
@@ -209,7 +217,7 @@ public abstract class WlBasePushEncoder {
         private boolean isChange = false;
         private boolean isStart = false;
 
-        public WlEGLMediaThread(WeakReference<WlBasePushEncoder> encoder) {
+        public WlEGLMediaThread(WeakReference<CameraRecordEncoder> encoder) {
             this.encoder = encoder;
         }
 
@@ -327,7 +335,7 @@ public abstract class WlBasePushEncoder {
 
     static class VideoEncodecThread extends Thread
     {
-        private WeakReference<WlBasePushEncoder> encoder;
+        private WeakReference<CameraRecordEncoder> encoder;
 
         private boolean isExit;
 
@@ -339,7 +347,7 @@ public abstract class WlBasePushEncoder {
         private byte[] pps;
         private boolean keyFrame = false;
 
-        public VideoEncodecThread(WeakReference<WlBasePushEncoder> encoder) {
+        public VideoEncodecThread(WeakReference<CameraRecordEncoder> encoder) {
             this.encoder = encoder;
             Log.i(TAG, "VideoEncodecThread: ------------------ 构造方法");
             videoEncodec = encoder.get().videoEncodec;
@@ -427,81 +435,6 @@ public abstract class WlBasePushEncoder {
 
     }
 
-    static class AudioEncodecThread extends Thread
-    {
-
-        private WeakReference<WlBasePushEncoder> encoder;
-        private boolean isExit;
-
-        private MediaCodec audioEncodec;
-        private MediaCodec.BufferInfo bufferInfo;
-
-        long pts;
-
-
-        public AudioEncodecThread(WeakReference<WlBasePushEncoder> encoder) {
-            this.encoder = encoder;
-            audioEncodec = encoder.get().audioEncodec;
-            bufferInfo = encoder.get().audioBufferinfo;
-        }
-
-        @Override
-        public void run() {
-            super.run();
-            pts = 0;
-            isExit = false;
-            audioEncodec.start();
-            while(true)
-            {
-                if(isExit)
-                {
-                    //
-
-                    audioEncodec.stop();
-                    audioEncodec.release();
-                    audioEncodec = null;
-                    break;
-                }
-
-                int outputBufferIndex = audioEncodec.dequeueOutputBuffer(bufferInfo, 0);
-                if(outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED)
-                {
-                }
-                else
-                {
-                    while(outputBufferIndex >= 0)
-                    {
-
-                        ByteBuffer outputBuffer = audioEncodec.getOutputBuffers()[outputBufferIndex];
-                        outputBuffer.position(bufferInfo.offset);
-                        outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                        if(pts == 0)
-                        {
-                            pts = bufferInfo.presentationTimeUs;
-                        }
-                        bufferInfo.presentationTimeUs = bufferInfo.presentationTimeUs - pts;
-
-                        byte[] data = new byte[outputBuffer.remaining()];
-                        outputBuffer.get(data, 0, data.length);
-                        if(encoder.get().onMediaInfoListener != null)
-                        {
-                            encoder.get().onMediaInfoListener.onAudioInfo(data);
-                        }
-
-                        audioEncodec.releaseOutputBuffer(outputBufferIndex, false);
-                        outputBufferIndex = audioEncodec.dequeueOutputBuffer(bufferInfo, 0);
-                    }
-                }
-
-            }
-
-        }
-        public void exit()
-        {
-            isExit = true;
-        }
-    }
-
     public interface OnMediaInfoListener
     {
         void onMediaTime(int times);
@@ -510,15 +443,9 @@ public abstract class WlBasePushEncoder {
 
         void onVideoInfo(byte[] data, boolean keyframe);
 
-        void onAudioInfo(byte[] data);
 
     }
 
-    private long getAudioPts(int size, int sampleRate)
-    {
-        audioPts += (long)(1.0 * size / (sampleRate * 2 * 2) * 1000000.0);
-        return audioPts;
-    }
 
     public static String byteToHex(byte[] bytes)
     {

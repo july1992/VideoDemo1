@@ -2,44 +2,43 @@ package com.vily.videodemo1.push.camera;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import com.vily.videodemo1.push.egl.WLEGLSurfaceView;
+import com.vily.videodemo1.push.egl.EGLSurfaceView;
 
 
-public class WlCameraView extends WLEGLSurfaceView {
+public class CameraView extends EGLSurfaceView {
 
     private static final String TAG = "WlCameraView";
-    private WlCameraRender wlCameraRender;
-    private WlCamera wlCamera;
+    private CameraRender wlCameraRender;
+    private CameraHander camera;
 
-    private int cameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+    private int cameraId = android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK;
 
     private int textureId = -1;
 
-    public WlCameraView(Context context) {
+    public CameraView(Context context) {
         this(context, null);
     }
 
-    public WlCameraView(Context context, AttributeSet attrs) {
+    public CameraView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public WlCameraView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CameraView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        wlCameraRender = new WlCameraRender(context);
-        wlCamera = new WlCamera(context);
+        wlCameraRender = new CameraRender(context);
+        camera = new CameraHander(context);
         setRender(wlCameraRender);
         previewAngle(context);
-        wlCameraRender.setOnSurfaceCreateListener(new WlCameraRender.OnSurfaceCreateListener() {
+        wlCameraRender.setOnSurfaceCreateListener(new CameraRender.OnSurfaceCreateListener() {
             @Override
             public void onSurfaceCreate(SurfaceTexture surfaceTexture, int tid) {
                 Log.i(TAG, "onSurfaceCreate: ----------------tid:"+tid);
-                wlCamera.initCamera(surfaceTexture, cameraId);
+                camera.initCamera(surfaceTexture, cameraId);
                 textureId = tid;
                 if(mOnSurfaceRenderListener!=null){
                     mOnSurfaceRenderListener.onSurfaceRender(surfaceTexture,tid);
@@ -51,9 +50,16 @@ public class WlCameraView extends WLEGLSurfaceView {
 
     public void onDestory()
     {
-        if(wlCamera != null)
+        if(camera != null)
         {
-            wlCamera.stopPreview();
+            camera.stopPreview();
+        }
+    }
+
+    public void onResume(){
+        if(camera != null)
+        {
+            camera.startPreview();
         }
     }
 
@@ -65,7 +71,7 @@ public class WlCameraView extends WLEGLSurfaceView {
         {
             case Surface.ROTATION_0:
                 Log.d("ywl5320", "0");
-                if(cameraId == Camera.CameraInfo.CAMERA_FACING_BACK)
+                if(cameraId == android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK)
                 {
                     wlCameraRender.setAngle(90, 0, 0, 1);
                     wlCameraRender.setAngle(180, 1, 0, 0);
@@ -78,7 +84,7 @@ public class WlCameraView extends WLEGLSurfaceView {
                 break;
             case Surface.ROTATION_90:
                 Log.d("ywl5320", "90");
-                if(cameraId == Camera.CameraInfo.CAMERA_FACING_BACK)
+                if(cameraId == android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK)
                 {
                     wlCameraRender.setAngle(180, 0, 0, 1);
                     wlCameraRender.setAngle(180, 0, 1, 0);
@@ -90,7 +96,7 @@ public class WlCameraView extends WLEGLSurfaceView {
                 break;
             case Surface.ROTATION_180:
                 Log.d("ywl5320", "180");
-                if(cameraId == Camera.CameraInfo.CAMERA_FACING_BACK)
+                if(cameraId == android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK)
                 {
                     wlCameraRender.setAngle(90f, 0.0f, 0f, 1f);
                     wlCameraRender.setAngle(180f, 0.0f, 1f, 0f);
@@ -102,7 +108,7 @@ public class WlCameraView extends WLEGLSurfaceView {
                 break;
             case Surface.ROTATION_270:
                 Log.d("ywl5320", "270");
-                if(cameraId == Camera.CameraInfo.CAMERA_FACING_BACK)
+                if(cameraId == android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK)
                 {
                     wlCameraRender.setAngle(180f, 0.0f, 1f, 0f);
                 }

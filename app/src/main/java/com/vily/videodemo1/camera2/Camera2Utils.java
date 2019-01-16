@@ -76,16 +76,16 @@ public class Camera2Utils {
     //Showing camera preview.
     private static final int STATE_PREVIEW = 0;
 
-    //Camera state: Waiting for the focus to be locked.
+    //CameraHander state: Waiting for the focus to be locked.
     private static final int STATE_WAITING_LOCK = 1;
 
     //amera state: Waiting for the exposure to be precapture state.
     private static final int STATE_WAITING_PRECAPTURE = 2;
 
-    //Camera state: Waiting for the exposure state to be something other than precapture.
+    //CameraHander state: Waiting for the exposure state to be something other than precapture.
     private static final int STATE_WAITING_NON_PRECAPTURE = 3;
 
-    //Camera state: Picture was taken.
+    //CameraHander state: Picture was taken.
     private static final int STATE_PICTURE_TAKEN = 4;
     private static final int STATE_DISCOUNT = 5;   // 摄像头断开
     private static final int STATE_ERROR = 6;   // 摄像头错误
@@ -153,6 +153,7 @@ public class Camera2Utils {
                 if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
                     continue;
                 }
+
 
                 // 获取摄像头支持的配置属性
                 StreamConfigurationMap map = characteristics.get(

@@ -10,7 +10,7 @@ import java.lang.ref.WeakReference;
 
 import javax.microedition.khronos.egl.EGLContext;
 
-public abstract class WLEGLSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
+public abstract class EGLSurfaceView extends SurfaceView implements SurfaceHolder.Callback{
 
 
     private Surface surface;
@@ -25,15 +25,15 @@ public abstract class WLEGLSurfaceView extends SurfaceView implements SurfaceHol
     private int mRenderMode = RENDERMODE_CONTINUOUSLY;
 
 
-    public WLEGLSurfaceView(Context context) {
+    public EGLSurfaceView(Context context) {
         this(context, null);
     }
 
-    public WLEGLSurfaceView(Context context, AttributeSet attrs) {
+    public EGLSurfaceView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public WLEGLSurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public EGLSurfaceView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         getHolder().addCallback(this);
     }
@@ -81,7 +81,7 @@ public abstract class WLEGLSurfaceView extends SurfaceView implements SurfaceHol
         {
             surface = holder.getSurface();
         }
-        wlEGLThread = new WlEGLThread(new WeakReference<WLEGLSurfaceView>(this));
+        wlEGLThread = new WlEGLThread(new WeakReference<EGLSurfaceView>(this));
         wlEGLThread.isCreate = true;
         wlEGLThread.start();
     }
@@ -113,7 +113,7 @@ public abstract class WLEGLSurfaceView extends SurfaceView implements SurfaceHol
 
     static class WlEGLThread extends Thread {
 
-        private WeakReference<WLEGLSurfaceView> wleglSurfaceViewWeakReference;
+        private WeakReference<EGLSurfaceView> wleglSurfaceViewWeakReference;
         private EglHelper eglHelper = null;
         private Object object = null;
 
@@ -125,7 +125,7 @@ public abstract class WLEGLSurfaceView extends SurfaceView implements SurfaceHol
         private int width;
         private int height;
 
-        public WlEGLThread(WeakReference<WLEGLSurfaceView> wleglSurfaceViewWeakReference) {
+        public WlEGLThread(WeakReference<EGLSurfaceView> wleglSurfaceViewWeakReference) {
             this.wleglSurfaceViewWeakReference = wleglSurfaceViewWeakReference;
         }
 
@@ -163,7 +163,7 @@ public abstract class WLEGLSurfaceView extends SurfaceView implements SurfaceHol
                     else if(wleglSurfaceViewWeakReference.get().mRenderMode == RENDERMODE_CONTINUOUSLY)
                     {
                         try {
-                            Thread.sleep(1000 / 60);
+                            Thread.sleep(1000 / 30);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }

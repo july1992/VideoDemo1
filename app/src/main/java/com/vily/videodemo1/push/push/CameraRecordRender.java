@@ -1,16 +1,17 @@
-package com.vily.videodemo1.push.camera;
+package com.vily.videodemo1.push.push;
 
 import android.content.Context;
 import android.opengl.GLES20;
 
 import com.vily.videodemo1.R;
-import com.vily.videodemo1.push.egl.WlShaderUtil;
+import com.vily.videodemo1.push.egl.EGLSurfaceView;
+import com.vily.videodemo1.push.egl.ShaderUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-public class WlCameraFboRender {
+public class CameraRecordRender implements EGLSurfaceView.WlGLRender{
 
     private Context context;
 
@@ -39,18 +40,17 @@ public class WlCameraFboRender {
     private int vPosition;
     private int fPosition;
     private int textureid;
-    private int sampler;
 
     private int vboId;
 
 //    private Bitmap bitmap;
-
 //    private int bitmapTextureid;
 
-    public WlCameraFboRender(Context context) {
+    public CameraRecordRender(Context context, int textureid) {
         this.context = context;
+        this.textureid = textureid;
 
-//        bitmap = WlShaderUtil.createTextImage("ssss", 50, "#ff0000", "#00000000", 0);
+//        bitmap = ShaderUtil.createTextImage("sssss", 50, "#ff0000", "#00000000", 0);
 
 
 //        float r = 1.0f * bitmap.getWidth() / bitmap.getHeight();
@@ -82,20 +82,19 @@ public class WlCameraFboRender {
 
     }
 
-    public void onCreate()
-    {
+    @Override
+    public void onSurfaceCreated() {
 
         GLES20.glEnable (GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 
-        String vertexSource = WlShaderUtil.getRawResource(context, R.raw.vertex_shader_screen);
-        String fragmentSource = WlShaderUtil.getRawResource(context, R.raw.fragment_shader_screen);
+        String vertexSource = ShaderUtil.getRawResource(context, R.raw.vertex_shader_screen);
+        String fragmentSource = ShaderUtil.getRawResource(context, R.raw.fragment_shader_screen);
 
-        program = WlShaderUtil.createProgram(vertexSource, fragmentSource);
+        program = ShaderUtil.createProgram(vertexSource, fragmentSource);
 
         vPosition = GLES20.glGetAttribLocation(program, "v_Position");
         fPosition = GLES20.glGetAttribLocation(program, "f_Position");
-        sampler = GLES20.glGetUniformLocation(program, "sTexture");
 
         int [] vbos = new int[1];
         GLES20.glGenBuffers(1, vbos, 0);
@@ -107,24 +106,24 @@ public class WlCameraFboRender {
         GLES20.glBufferSubData(GLES20.GL_ARRAY_BUFFER, vertexData.length * 4, fragmentData.length * 4, fragmentBuffer);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
 
-//        bitmapTextureid = WlShaderUtil.loadBitmapTexture(bitmap);
+//        bitmapTextureid = ShaderUtil.loadBitmapTexture(bitmap);
     }
 
-    public void onChange(int width, int height)
-    {
+    @Override
+    public void onSurfaceChanged(int width, int height) {
         GLES20.glViewport(0, 0, width, height);
     }
 
-    public void onDraw(int textureId)
-    {
+    @Override
+    public void onDrawFrame() {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glClearColor(1f,0f, 0f, 1f);
 
         GLES20.glUseProgram(program);
+
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vboId);
 
-        //fbo
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureid);
 
         GLES20.glEnableVertexAttribArray(vPosition);
         GLES20.glVertexAttribPointer(vPosition, 2, GLES20.GL_FLOAT, false, 8,
@@ -135,6 +134,7 @@ public class WlCameraFboRender {
                 vertexData.length * 4);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
+
 
         //bitmap
 //        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, bitmapTextureid);
@@ -148,8 +148,6 @@ public class WlCameraFboRender {
                 vertexData.length * 4);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
-
-
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);

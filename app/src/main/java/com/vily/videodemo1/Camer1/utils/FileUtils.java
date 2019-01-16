@@ -19,9 +19,9 @@ import java.security.NoSuchAlgorithmException;
 public class FileUtils {
 
     /** 拼接路径
-     *  concatPath("/mnt/sdcard", "/DCIM/Camera")  	=>		/mnt/sdcard/DCIM/Camera
-     *  concatPath("/mnt/sdcard", "DCIM/Camera")  	=>		/mnt/sdcard/DCIM/Camera
-     *  concatPath("/mnt/sdcard/", "/DCIM/Camera")  =>		/mnt/sdcard/DCIM/Camera
+     *  concatPath("/mnt/sdcard", "/DCIM/CameraHander")  	=>		/mnt/sdcard/DCIM/CameraHander
+     *  concatPath("/mnt/sdcard", "DCIM/CameraHander")  	=>		/mnt/sdcard/DCIM/CameraHander
+     *  concatPath("/mnt/sdcard/", "/DCIM/CameraHander")  =>		/mnt/sdcard/DCIM/CameraHander
      * */
     public static String concatPath(String... paths) {
         StringBuilder result = new StringBuilder();

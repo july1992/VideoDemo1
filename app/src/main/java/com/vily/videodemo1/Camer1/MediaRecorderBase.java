@@ -248,7 +248,7 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 				camera.cancelAutoFocus();
 				// getMaxNumFocusAreas检测设备是否支持
 				if (mParameters.getMaxNumFocusAreas() > 0) {
-					// mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_MACRO);//
+					// mParameters.setFocusMode(CameraHander.Parameters.FOCUS_MODE_MACRO);//
 					// Macro(close-up) focus mode
 					mParameters.setFocusAreas(focusAreas);
 				}
@@ -414,8 +414,8 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 		}
 
 		//设置人像模式，用来拍摄人物相片，如证件照。数码相机会把光圈调到最大，做出浅景深的效果。而有些相机还会使用能够表现更强肤色效果的色调、对比度或柔化效果进行拍摄，以突出人像主体。
-		//		if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT && isSupported(mParameters.getSupportedSceneModes(), Camera.Parameters.SCENE_MODE_PORTRAIT))
-		//			mParameters.setSceneMode(Camera.Parameters.SCENE_MODE_PORTRAIT);
+		//		if (mCameraId == CameraHander.CameraInfo.CAMERA_FACING_FRONT && isSupported(mParameters.getSupportedSceneModes(), CameraHander.Parameters.SCENE_MODE_PORTRAIT))
+		//			mParameters.setSceneMode(CameraHander.Parameters.SCENE_MODE_PORTRAIT);
 
 		if (isSupported(mParameters.getSupportedWhiteBalance(), "auto"))
 			mParameters.setWhiteBalance("auto");
@@ -426,7 +426,7 @@ public abstract class MediaRecorderBase implements Callback, PreviewCallback, IM
 
 		//		mParameters.set("recording-hint", "false");
 		//
-		//		mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+		//		mParameters.setFocusMode(CameraHander.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
 		if (!DeviceUtils.isDevice("GT-N7100", "GT-I9308", "GT-I9300")) {
 			mParameters.set("cam_mode", 1);
 			mParameters.set("cam-mode", 1);

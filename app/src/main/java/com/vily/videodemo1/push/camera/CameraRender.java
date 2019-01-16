@@ -8,15 +8,18 @@ import android.opengl.Matrix;
 import android.util.Log;
 
 import com.vily.videodemo1.R;
-import com.vily.videodemo1.push.egl.WLEGLSurfaceView;
-import com.vily.videodemo1.push.egl.WlShaderUtil;
+import com.vily.videodemo1.push.egl.EGLSurfaceView;
+import com.vily.videodemo1.push.egl.ShaderUtil;
 import com.vily.videodemo1.push.util.DisplayUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-public class WlCameraRender implements WLEGLSurfaceView.WlGLRender, SurfaceTexture.OnFrameAvailableListener{
+public class CameraRender implements EGLSurfaceView.WlGLRender, SurfaceTexture.OnFrameAvailableListener{
+
+
+    private static final String TAG = "CameraRender";
 
     private Context context;
 
@@ -52,7 +55,7 @@ public class WlCameraRender implements WLEGLSurfaceView.WlGLRender, SurfaceTextu
     private SurfaceTexture surfaceTexture;
     private OnSurfaceCreateListener onSurfaceCreateListener;
 
-    private WlCameraFboRender wlCameraFboRender;
+    private CameraFboRender wlCameraFboRender;
 
 
     private int screenWidth;
@@ -62,12 +65,13 @@ public class WlCameraRender implements WLEGLSurfaceView.WlGLRender, SurfaceTextu
     private int height;
 
 
-    public WlCameraRender(Context context) {
+    public CameraRender(Context context) {
+
         this.context = context;
         screenWidth = DisplayUtil.getScreenWidth(context);
         screenHeight = DisplayUtil.getScreenHeight(context);
 
-        wlCameraFboRender = new WlCameraFboRender(context);
+        wlCameraFboRender = new CameraFboRender(context);
         vertexBuffer = ByteBuffer.allocateDirect(vertexData.length * 4)
                 .order(ByteOrder.nativeOrder())
                 .asFloatBuffer()
@@ -89,10 +93,10 @@ public class WlCameraRender implements WLEGLSurfaceView.WlGLRender, SurfaceTextu
     public void onSurfaceCreated() {
 
         wlCameraFboRender.onCreate();
-        String vertexSource = WlShaderUtil.getRawResource(context, R.raw.vertex_shader);
-        String fragmentSource = WlShaderUtil.getRawResource(context, R.raw.fragment_shader);
+        String vertexSource = ShaderUtil.getRawResource(context, R.raw.vertex_shader);
+        String fragmentSource = ShaderUtil.getRawResource(context, R.raw.fragment_shader);
 
-        program = WlShaderUtil.createProgram(vertexSource, fragmentSource);
+        program = ShaderUtil.createProgram(vertexSource, fragmentSource);
         vPosition = GLES20.glGetAttribLocation(program, "v_Position");
         fPosition = GLES20.glGetAttribLocation(program, "f_Position");
         umatrix = GLES20.glGetUniformLocation(program, "u_Matrix");
