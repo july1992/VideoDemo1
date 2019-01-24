@@ -8,13 +8,7 @@
         android:layout_width="240dp"
         android:layout_height="320dp" />
 
-    <Button
-        android:id="@+id/btn_record"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:text="暂停"
-        android:layout_alignParentBottom="true"
-        android:onClick="startpush"/>
+
 
     <SurfaceView
         android:id="@+id/surfaceview"
@@ -23,4 +17,7 @@
         android:layout_height="240px"
         android:layout_marginTop="30dp"
         android:layout_marginLeft="30dp"/>
+
+
+
 </RelativeLayout>

@@ -3,6 +3,7 @@ package com.vily.videodemo1;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -10,7 +11,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
+import com.vily.videodemo1.camera0.Camera1Utils;
+import com.vily.videodemo1.camera0.RecordActivity;
 import com.vily.videodemo1.playH265.CameraByteDecoder;
 import com.vily.videodemo1.playH265.CameraRecordDecoder;
 import com.vily.videodemo1.push.camera.CameraView;
@@ -35,8 +39,8 @@ public class LivePushActivity extends AppCompatActivity {
     private static final String TAG = "LivePushActivity";
     private Timer mTimer;
 
-    private int vCount=0;
-    private int count=0;
+    private int vCount = 0;
+    private int count = 0;
     private Button mBtn_record;
 
     private File file;
@@ -44,12 +48,15 @@ public class LivePushActivity extends AppCompatActivity {
     private SurfaceView mSurfaceview;
     private CameraByteDecoder mCameraByteDecoder;
 
+//    private ImageView mIv_change_flash;
+//    private ImageView mIv_change_camera;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_livepush);
         wlCameraView = findViewById(R.id.cameraview);
-        mBtn_record = findViewById(R.id.btn_record);
+
         mSurfaceview = findViewById(R.id.surfaceview);
 
 
@@ -57,7 +64,7 @@ public class LivePushActivity extends AppCompatActivity {
         try {
 
             if (file == null) {
-                file = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/vilyxxx.h265");
+                file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/vilyxxx.h265");
             }
             if (!file.exists()) {
                 file.createNewFile();
@@ -70,24 +77,25 @@ public class LivePushActivity extends AppCompatActivity {
         mTimer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.i(TAG, "run: ------------------视频每秒的码流："+vCount*8/1024);
-                Log.i(TAG, "run: ------------------视频每秒的大小："+count);
-                vCount=0;
-                count=0;
+                Log.i(TAG, "run: ------------------视频每秒的码流：" + vCount * 8 / 1024);
+                Log.i(TAG, "run: ------------------视频每秒的大小：" + count);
+                vCount = 0;
+                count = 0;
             }
-        }, 0,1000);
+        }, 0, 1000);
         wlCameraView.setOnSurfaceRenderListener(new CameraView.OnSurfaceRenderListener() {
             @Override
             public void onSurfaceRender(SurfaceTexture surfaceTexture, int tid) {
-                if(wlCameraView.getTextureId()!=-1){
+
+                if(wlPushEncodec==null){
                     wlPushEncodec = new CameraRecordEncoder(LivePushActivity.this, tid);
-                    wlPushEncodec.initEncodec(wlCameraView.getEglContext(), 320, 240);
+                    wlPushEncodec.initEncodec(wlCameraView.getEglContext(), MyApplication.mWidth, MyApplication.mHeight);
                     wlPushEncodec.startRecord();
                     wlPushEncodec.setOnMediaInfoListener(new CameraRecordEncoder.OnMediaInfoListener() {
                         @Override
                         public void onMediaTime(int times) {
 
-                            Log.i(TAG, "onMediaTime: --------------:"+times);
+                            Log.i(TAG, "onMediaTime: --------------:" + times);
                         }
 
                         @Override
@@ -100,18 +108,26 @@ public class LivePushActivity extends AppCompatActivity {
 
                         @Override
                         public void onVideoInfo(byte[] data, boolean keyframe) {
-                            Log.d(TAG, "-------------------video-data:" + DisplayUtil.byteToHex(data));
-                            Log.i(TAG, "onVideoInfo: ---------------video:"+data.length);
-                            vCount+=data.length;
-                            count+=data.length;
+                            Log.d(TAG, "-------------------video-data:" +keyframe+"--"+ DisplayUtil.byteToHex(data));
+                            Log.i(TAG, "onVideoInfo: ---------------video:" + data.length);
+                            vCount += data.length;
+                            count += data.length;
 //                            write2LocalFile(data);
-                            if(mCameraByteDecoder!=null){
+                            if(mCameraByteDecoder!=null && !isPause){
                                 mCameraByteDecoder.sendByte(data);
                             }
                         }
 
                     });
                 }
+
+
+            }
+
+            @Override
+            public void onSurfaceDestroy() {
+                wlPushEncodec.stopRecord();
+                wlPushEncodec = null;
             }
         });
 
@@ -119,11 +135,35 @@ public class LivePushActivity extends AppCompatActivity {
     }
 
     private void listener() {
+
+//        mIv_change_flash.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (wlCameraView.changeFlash()) {
+//                    mIv_change_flash.setImageResource(R.mipmap.video_flash_open);
+//                } else {
+//                    mIv_change_flash.setImageResource(R.mipmap.video_flash_close);
+//                }
+//            }
+//        });
+//
+//        mIv_change_camera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                wlCameraView.switchCamera();
+//                mIv_change_flash.setImageResource(R.mipmap.video_flash_close);
+//            }
+//        });
+
         mSurfaceview.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder surfaceHolder) {
-                mCameraByteDecoder = new CameraByteDecoder();
-                mCameraByteDecoder.initCameraDecode(320,240,surfaceHolder);
+                Log.i(TAG, "surfaceCreated: -----几次生命周期");
+                if(mCameraByteDecoder==null){
+                    mCameraByteDecoder = new CameraByteDecoder();
+                    mCameraByteDecoder.initCameraDecode(MyApplication.mWidth, MyApplication.mHeight, surfaceHolder);
+                }
+
             }
 
             @Override
@@ -133,7 +173,8 @@ public class LivePushActivity extends AppCompatActivity {
 
             @Override
             public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-
+                mCameraByteDecoder.onDestroy();
+                mCameraByteDecoder=null;
             }
         });
     }
@@ -151,35 +192,25 @@ public class LivePushActivity extends AppCompatActivity {
             Log.e(TAG, "copyVideoResourceToMemory--------- IOException : " + e);
         }
     }
-    public void startpush(View view) {
 
-        if(start){
-
-            mTimer.cancel();
-            mTimer=null;
-            if(wlPushEncodec!=null){
-                wlPushEncodec.stopRecord();
-                wlPushEncodec = null;
-            }
-
-        }else {
-        }
-
-    }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        if(wlPushEncodec!=null){
+    protected void onDestroy() {
+        super.onDestroy();
+        if (wlPushEncodec != null) {
             wlPushEncodec.stopRecord();
             wlPushEncodec = null;
         }
+        if(mCameraByteDecoder!=null){
+            mCameraByteDecoder.onDestroy();
+            mCameraByteDecoder=null;
+        }
         wlCameraView.onDestory();
-        wlCameraView=null;
-        if(mTimer!=null){
+        wlCameraView = null;
+        if (mTimer != null) {
             mTimer.cancel();
-            mTimer=null;
-            mTimer=null;
+            mTimer = null;
+
         }
 
 
@@ -190,17 +221,47 @@ public class LivePushActivity extends AppCompatActivity {
         }
     }
 
-
+    private boolean isPause = false;
     @Override
     protected void onPause() {
         super.onPause();
+        isPause = true;
 
-        wlCameraView.onDestory();
+        if (wlPushEncodec != null) {
+            wlPushEncodec.pause();
+        }
+        if (wlCameraView != null) {
+
+            wlCameraView.stopPreview();
+        }
     }
 
+    private boolean isFirst = true;
+
     @Override
-    protected void onRestart() {
-        super.onRestart();
-//        wlCameraView.onResume();
+    protected void onResume() {
+        super.onResume();
+
+
+        if (isFirst) {
+
+            Log.i(TAG, "onResume: -------1");
+            isFirst = false;
+            return;
+        } else {
+            if (wlCameraView != null) {
+
+                wlCameraView.startPreview();
+
+            }
+            if (wlPushEncodec != null) {
+                wlPushEncodec.resume();
+            }
+            SystemClock.sleep(200);
+            isPause = false;
+            Log.i(TAG, "onResume: -------isPause:"+isPause);
+        }
+
+
     }
 }

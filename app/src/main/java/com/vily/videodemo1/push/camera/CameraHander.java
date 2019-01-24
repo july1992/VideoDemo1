@@ -1,13 +1,19 @@
 package com.vily.videodemo1.push.camera;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Build;
+import android.util.Log;
+import android.view.Display;
+import android.view.Surface;
 
 import com.vily.videodemo1.Camer1.utils.DeviceUtils;
 import com.vily.videodemo1.Camer1.utils.StringUtils;
+import com.vily.videodemo1.MyApplication;
+import com.vily.videodemo1.camera0.RecordActivity;
 import com.vily.videodemo1.push.util.DisplayUtil;
 
 import java.io.IOException;
@@ -24,10 +30,12 @@ public class CameraHander {
     private int width;
     private int height;
     private android.hardware.Camera.Parameters mParameters;
-    private int cameraId=0;
+    private int cameraId=1;
+    private Context mContext;
 
     public CameraHander(Context context){
 
+        this.mContext=context;
         this.width = DisplayUtil.getScreenWidth(context);
         this.height = DisplayUtil.getScreenHeight(context);
 
@@ -44,7 +52,8 @@ public class CameraHander {
     {
         try {
             camera = android.hardware.Camera.open(cameraId);
-            cameraId=cameraId;
+
+            this.cameraId=cameraId;
             camera.setPreviewTexture(surfaceTexture);
             mParameters = camera.getParameters();
 
@@ -67,13 +76,9 @@ public class CameraHander {
                 mParameters.set("cam-mode", 1);
             }
 
+            mParameters.setPictureSize(MyApplication.mWidth,MyApplication.mHeight);
 
-
-            android.hardware.Camera.Size size = getFitSize(mParameters.getSupportedPictureSizes());
-            mParameters.setPictureSize(320,240);
-
-            size = getFitSize(mParameters.getSupportedPreviewSizes());
-            mParameters.setPreviewSize(320, 240);
+            mParameters.setPreviewSize(MyApplication.mWidth, MyApplication.mHeight);
 
             camera.setParameters(mParameters);
             camera.startPreview();
@@ -82,8 +87,6 @@ public class CameraHander {
             e.printStackTrace();
         }
     }
-
-
 
     //  连续自动对焦 */
     private String getAutoFocusMode() {
@@ -106,49 +109,76 @@ public class CameraHander {
         return list != null && list.contains(key);
     }
 
+
+    public void switchCamera() {
+        if (cameraId == Camera.CameraInfo.CAMERA_FACING_BACK) {
+
+            cameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+            if(camera != null)
+            {
+                destroyPreview();
+            }
+            setCameraParm(cameraId);
+        } else {
+
+            cameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+            if(camera != null)
+            {
+                destroyPreview();
+            }
+            setCameraParm(cameraId);
+        }
+    }
+
+    //  闪光灯是否可用
+    public boolean flashEnable(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
+                && cameraId == Camera.CameraInfo.CAMERA_FACING_BACK;
+
+    }
+
+    //  闪光灯
+    public boolean changeFlash() {
+        boolean flashOn = false;
+        if (flashEnable(mContext)) {
+            Camera.Parameters params = camera.getParameters();
+            if (Camera.Parameters.FLASH_MODE_TORCH.equals(params.getFlashMode())) {
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
+                flashOn = false;
+            } else {
+                params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
+                flashOn = true;
+            }
+            camera.setParameters(params);
+        }
+        return flashOn;
+    }
+
+
+
+    public void reStartPreview() {
+
+        setCameraParm(cameraId);
+    }
     public void stopPreview()
     {
+        if(camera != null)
+        {
+            camera.stopPreview();
+
+        }
+    }
+    public void startPreview() {
+
+        camera.startPreview();
+    }
+
+    public void destroyPreview(){
         if(camera != null)
         {
             camera.stopPreview();
             camera.release();
             camera = null;
         }
-    }
-
-    public void changeCamera(int cameraId)
-    {
-        if(camera != null)
-        {
-            stopPreview();
-        }
-        setCameraParm(cameraId);
-    }
-
-    private android.hardware.Camera.Size getFitSize(List<android.hardware.Camera.Size> sizes)
-    {
-        if(width < height)
-        {
-            int t = height;
-            height = width;
-            width = t;
-        }
-
-        for(android.hardware.Camera.Size size : sizes)
-        {
-            if(1.0f * size.width / size.height == 1.0f * width / height)
-            {
-                return size;
-            }
-        }
-        return sizes.get(0);
-    }
-
-    public void startPreview() {
-        if(camera != null)
-        {
-            stopPreview();
-        }
-        setCameraParm(cameraId);
     }
 }

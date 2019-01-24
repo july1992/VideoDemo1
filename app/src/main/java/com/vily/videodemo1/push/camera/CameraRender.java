@@ -219,6 +219,13 @@ public class CameraRender implements EGLSurfaceView.WlGLRender, SurfaceTexture.O
     }
 
     @Override
+    public void onSurfaceDestroy() {
+        if(wlCameraFboRender!=null){
+            onSurfaceCreateListener.onSurfaceDestroy();
+        }
+    }
+
+    @Override
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
 
     }
@@ -230,6 +237,7 @@ public class CameraRender implements EGLSurfaceView.WlGLRender, SurfaceTexture.O
     public interface OnSurfaceCreateListener
     {
         void onSurfaceCreate(SurfaceTexture surfaceTexture, int textureId);
+        void onSurfaceDestroy();
     }
 
 }

@@ -77,6 +77,7 @@ public class CameraByteDecoder {
         onFrame(data,0,data.length);
     }
 
+
     //  解码线程
     private class DecoderThread extends Thread {
 
@@ -224,7 +225,7 @@ public class CameraByteDecoder {
         //-1表示一直等待；0表示不等待；其他大于0的参数表示等待毫秒数
         //Log.e(TAG,"        onFrame start       ");
 
-
+        Log.i(TAG, "onFrame: -------isfinish:"+isFinish);
         if (mCodec0 != null) {
             int inputBufferIndex = mCodec0.dequeueInputBuffer(-1);
             if (!isFinish && inputBufferIndex >= 0) {
@@ -248,6 +249,7 @@ public class CameraByteDecoder {
         }
 
     }
+
 
     public void onDestroy(){
         isFinish = true;

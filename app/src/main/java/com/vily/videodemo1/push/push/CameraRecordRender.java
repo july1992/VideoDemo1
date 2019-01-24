@@ -152,4 +152,9 @@ public class CameraRecordRender implements EGLSurfaceView.WlGLRender{
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
     }
+
+    @Override
+    public void onSurfaceDestroy() {
+
+    }
 }

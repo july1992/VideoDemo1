@@ -25,8 +25,8 @@ public class CameraRecordEncoder {
 
     private int width;
     private int height;
-    private int bit_rate=80000;
-    private int framrate=25;
+    private int bit_rate = 80000;
+    private int framrate = 30;
 
     private MediaCodec videoEncodec;
     private MediaFormat videoFormat;
@@ -52,9 +52,10 @@ public class CameraRecordEncoder {
 
     private OnMediaInfoListener onMediaInfoListener;
 
-    public CameraRecordEncoder(){
+    public CameraRecordEncoder() {
 
     }
+
     public CameraRecordEncoder(Context context, int textureId) {
         CameraRecordRender wlEncodecPushRender = new CameraRecordRender(context, textureId);
         setRender(wlEncodecPushRender);
@@ -66,9 +67,8 @@ public class CameraRecordEncoder {
     }
 
     public void setmRenderMode(int mRenderMode) {
-        if(wlGLRender == null)
-        {
-            throw  new RuntimeException("must set render before");
+        if (wlGLRender == null) {
+            throw new RuntimeException("must set render before");
         }
         this.mRenderMode = mRenderMode;
     }
@@ -77,74 +77,50 @@ public class CameraRecordEncoder {
         this.onMediaInfoListener = onMediaInfoListener;
     }
 
-    public void initEncodec(EGLContext eglContext, int width, int height)
-    {
+    public void initEncodec(EGLContext eglContext, int width, int height) {
         this.width = width;
         this.height = height;
         this.eglContext = eglContext;
         initMediaEncodec(width, height, 44100, 2);
     }
 
-    public void startRecord()
-    {
+    public void startRecord() {
         Log.i(TAG, "startRecord: -------------:这里？");
-        if(surface != null && eglContext != null)
-        {
+        if (surface != null && eglContext != null) {
 
             Log.i(TAG, "startRecord: ---------------开始录制");
-//            audioPts = 0;
 
             wlEGLMediaThread = new WlEGLMediaThread(new WeakReference<CameraRecordEncoder>(this));
             videoEncodecThread = new VideoEncodecThread(new WeakReference<CameraRecordEncoder>(this));
-//            audioEncodecThread = new AudioEncodecThread(new WeakReference<CameraRecordEncoder>(this));
+
             wlEGLMediaThread.isCreate = true;
             wlEGLMediaThread.isChange = true;
             wlEGLMediaThread.start();
             videoEncodecThread.start();
-//            audioEncodecThread.start();
-//            wlAudioRecordUitl.startRecord();
+
         }
     }
 
-    public void stopRecord()
-    {
-        if(wlEGLMediaThread != null && videoEncodecThread != null )
-        {
-//            wlAudioRecordUitl.stopRecord();
+    public void stopRecord() {
+        if (wlEGLMediaThread != null && videoEncodecThread != null) {
+
             videoEncodecThread.exit();
-//            audioEncodecThread.exit();
+
             wlEGLMediaThread.onDestory();
             videoEncodecThread = null;
             wlEGLMediaThread = null;
-//            audioEncodecThread = null;
+
         }
     }
 
-    private void initMediaEncodec(int width, int height, int sampleRate, int channelCount)
-    {
+    private void initMediaEncodec(int width, int height, int sampleRate, int channelCount) {
         Log.i(TAG, "initMediaEncodec: ------------------hhhhh");
         initVideoEncodec(MediaFormat.MIMETYPE_VIDEO_HEVC, width, height);
-//        initAudioEncodec(MediaFormat.MIMETYPE_AUDIO_AAC, sampleRate, channelCount);
-//        initPCMRecord();
+
     }
 
-//    private void initPCMRecord()
-//    {
-//        wlAudioRecordUitl = new WlAudioRecordUitl();
-//        wlAudioRecordUitl.setOnRecordLisener(new WlAudioRecordUitl.OnRecordLisener() {
-//            @Override
-//            public void recordByte(byte[] audioData, int readSize) {
-//                if(wlAudioRecordUitl.isStart())
-//                {
-//                    putPCMData(audioData, readSize);
-//                }
-//            }
-//        });
-//    }
 
-
-    private void initVideoEncodec(String mimeType, int width, int height)
-    {
+    private void initVideoEncodec(String mimeType, int width, int height) {
         try {
             videoBufferinfo = new MediaCodec.BufferInfo();
             videoFormat = MediaFormat.createVideoFormat(mimeType, width, height);
@@ -168,46 +144,9 @@ public class CameraRecordEncoder {
 
     }
 
-//    private void initAudioEncodec(String mimeType, int sampleRate, int channelCount)
-//    {
-//        try {
-//            this.sampleRate = sampleRate;
-//            audioBufferinfo = new MediaCodec.BufferInfo();
-//            audioFormat = MediaFormat.createAudioFormat(mimeType, sampleRate, channelCount);
-//            audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, 96000);
-//            audioFormat.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
-//            audioFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 4096 * 10);
-//
-//            audioEncodec = MediaCodec.createEncoderByType(mimeType);
-//            audioEncodec.configure(audioFormat, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE);
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            audioBufferinfo = null;
-//            audioFormat = null;
-//            audioEncodec = null;
-//        }
-//    }
-//
-//    public void putPCMData(byte[] buffer, int size)
-//    {
-//        if(audioEncodecThread != null && !audioEncodecThread.isExit && buffer != null && size > 0)
-//        {
-//            int inputBufferindex = audioEncodec.dequeueInputBuffer(0);
-//            if(inputBufferindex >= 0)
-//            {
-//                ByteBuffer byteBuffer = audioEncodec.getInputBuffers()[inputBufferindex];
-//                byteBuffer.clear();
-//                byteBuffer.put(buffer);
-//                long pts = getAudioPts(size, sampleRate);
-//                audioEncodec.queueInputBuffer(inputBufferindex, 0, size, pts, 0);
-//            }
-//        }
-//    }
 
     // 将通过 surface = videoEncodec.createInputSurface(); 获取到到suface渲染出去
-    static class WlEGLMediaThread extends Thread
-    {
+    static class WlEGLMediaThread extends Thread {
         private WeakReference<CameraRecordEncoder> encoder;
         private EglHelper eglHelper;
         private Object object;
@@ -216,6 +155,7 @@ public class CameraRecordEncoder {
         private boolean isCreate = false;
         private boolean isChange = false;
         private boolean isStart = false;
+        private boolean isPause = false;
 
         public WlEGLMediaThread(WeakReference<CameraRecordEncoder> encoder) {
             this.encoder = encoder;
@@ -230,38 +170,29 @@ public class CameraRecordEncoder {
             eglHelper = new EglHelper();
             eglHelper.initEgl(encoder.get().surface, encoder.get().eglContext);
 
-            while(true)
-            {
-                if(isExit)
-                {
+            while (true) {
+                if (isExit) {
                     release();
                     break;
                 }
 
-                if(isStart)
-                {
-                    if(encoder.get().mRenderMode == RENDERMODE_WHEN_DIRTY)
-                    {
-                        synchronized (object)
-                        {
+                if (isStart && !isPause) {
+                    if (encoder.get().mRenderMode == RENDERMODE_WHEN_DIRTY) {
+                        synchronized (object) {
                             try {
                                 object.wait();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
                         }
-                    }
-                    else if(encoder.get().mRenderMode == RENDERMODE_CONTINUOUSLY)
-                    {
+                    } else if (encoder.get().mRenderMode == RENDERMODE_CONTINUOUSLY) {
                         try {
-                            Thread.sleep(1000 / 25);
+                            Thread.sleep(1000 / 30);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                    }
-                    else
-                    {
-                        throw  new RuntimeException("mRenderMode is wrong value");
+                    } else {
+                        throw new RuntimeException("mRenderMode is wrong value");
                     }
                 }
                 onCreate();
@@ -272,31 +203,24 @@ public class CameraRecordEncoder {
 
         }
 
-        private void onCreate()
-        {
-            if(isCreate && encoder.get().wlGLRender != null)
-            {
+        private void onCreate() {
+            if (isCreate && encoder.get().wlGLRender != null) {
                 isCreate = false;
                 encoder.get().wlGLRender.onSurfaceCreated();
             }
         }
 
-        private void onChange(int width, int height)
-        {
-            if(isChange && encoder.get().wlGLRender != null)
-            {
+        private void onChange(int width, int height) {
+            if (isChange && encoder.get().wlGLRender != null && !isPause) {
                 isChange = false;
                 encoder.get().wlGLRender.onSurfaceChanged(width, height);
             }
         }
 
-        private void onDraw()
-        {
-            if(encoder.get().wlGLRender != null && eglHelper != null)
-            {
+        private void onDraw() {
+            if (encoder.get().wlGLRender != null && eglHelper != null && !isPause) {
                 encoder.get().wlGLRender.onDrawFrame();
-                if(!isStart)
-                {
+                if (!isStart) {
                     encoder.get().wlGLRender.onDrawFrame();
                 }
                 eglHelper.swapBuffers();
@@ -304,37 +228,35 @@ public class CameraRecordEncoder {
             }
         }
 
-        private void requestRender()
-        {
-            if(object != null)
-            {
-                synchronized (object)
-                {
+        private void requestRender() {
+            if (object != null) {
+                synchronized (object) {
                     object.notifyAll();
                 }
             }
         }
 
-        public void onDestory()
-        {
+        public void onDestory() {
             isExit = true;
             requestRender();
         }
 
-        public void release()
-        {
-            if(eglHelper != null)
-            {
+        public void release() {
+            if (eglHelper != null) {
                 eglHelper.destoryEgl();
                 eglHelper = null;
                 object = null;
                 encoder = null;
             }
         }
+
+        private void onPause(boolean pause) {
+            isPause = pause;
+
+        }
     }
 
-    static class VideoEncodecThread extends Thread
-    {
+    static class VideoEncodecThread extends Thread {
         private WeakReference<CameraRecordEncoder> encoder;
 
         private boolean isExit;
@@ -346,6 +268,7 @@ public class CameraRecordEncoder {
         private byte[] sps;
         private byte[] pps;
         private boolean keyFrame = false;
+        private boolean isPause = false;
 
         public VideoEncodecThread(WeakReference<CameraRecordEncoder> encoder) {
             this.encoder = encoder;
@@ -360,83 +283,86 @@ public class CameraRecordEncoder {
             pts = 0;
             isExit = false;
             videoEncodec.start();
-            while(true)
-            {
-                if(isExit)
-                {
-
+            while (true) {
+                if (isExit) {
                     videoEncodec.stop();
                     videoEncodec.release();
                     videoEncodec = null;
                     Log.d(TAG, "---------------------------视频录制完成");
                     break;
                 }
+                if (isPause) {
 
-                int outputBufferIndex = videoEncodec.dequeueOutputBuffer(videoBufferinfo, 0);
-                keyFrame = false;
+//                    videoEncodec.reset();
+                    videoEncodec.flush();
+//                    videoEncodec.stop();
 
-                if(outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED)
-                {
-                    Log.d(TAG, "INFO_OUTPUT_FORMAT_CHANGED-----------------");
 
-                    ByteBuffer spsb = videoEncodec.getOutputFormat().getByteBuffer("csd-0");
-                    sps = new byte[spsb.remaining()];
-                    spsb.get(sps, 0, sps.length);
+                } else {
+
+
+                    int outputBufferIndex = videoEncodec.dequeueOutputBuffer(videoBufferinfo, 0);
+                    keyFrame = false;
+
+                    if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                        Log.d(TAG, "INFO_OUTPUT_FORMAT_CHANGED-----------------");
+
+                        ByteBuffer spsb = videoEncodec.getOutputFormat().getByteBuffer("csd-0");
+                        sps = new byte[spsb.remaining()];
+                        spsb.get(sps, 0, sps.length);
 
 //                    ByteBuffer ppsb = videoEncodec.getOutputFormat().getByteBuffer("csd-1");
 //                    pps = new byte[ppsb.remaining()];
 //                    ppsb.get(pps, 0, pps.length);
 
-                }
-                else
-                {
-                    while (outputBufferIndex >= 0)
-                    {
-                        ByteBuffer outputBuffer = videoEncodec.getOutputBuffers()[outputBufferIndex];
-                        outputBuffer.position(videoBufferinfo.offset);
-                        outputBuffer.limit(videoBufferinfo.offset + videoBufferinfo.size);
-                        //
-                        if(pts == 0)
-                        {
-                            pts = videoBufferinfo.presentationTimeUs;
-                        }
-                        videoBufferinfo.presentationTimeUs = videoBufferinfo.presentationTimeUs - pts;
-
-
-                        byte[] data = new byte[outputBuffer.remaining()];
-                        outputBuffer.get(data, 0, data.length);
-
-
-                        if(videoBufferinfo.flags == MediaCodec.BUFFER_FLAG_KEY_FRAME)
-                        {
-                            keyFrame = true;
-                            if(encoder.get().onMediaInfoListener != null)
-                            {
-                                encoder.get().onMediaInfoListener.onSPSPPSInfo(sps);
+                    } else {
+                        while (outputBufferIndex >= 0) {
+                            ByteBuffer outputBuffer = videoEncodec.getOutputBuffers()[outputBufferIndex];
+                            outputBuffer.position(videoBufferinfo.offset);
+                            outputBuffer.limit(videoBufferinfo.offset + videoBufferinfo.size);
+                            //
+                            if (pts == 0) {
+                                pts = videoBufferinfo.presentationTimeUs;
                             }
-                        }
-                        if(encoder.get().onMediaInfoListener != null)
-                        {
-                            encoder.get().onMediaInfoListener.onVideoInfo(data, keyFrame);
-                            encoder.get().onMediaInfoListener.onMediaTime((int) (videoBufferinfo.presentationTimeUs / 1000000));
-                        }
-                        videoEncodec.releaseOutputBuffer(outputBufferIndex, false);
-                        outputBufferIndex = videoEncodec.dequeueOutputBuffer(videoBufferinfo, 0);
+                            videoBufferinfo.presentationTimeUs = videoBufferinfo.presentationTimeUs - pts;
 
+
+                            byte[] data = new byte[outputBuffer.remaining()];
+                            outputBuffer.get(data, 0, data.length);
+
+
+                            if (videoBufferinfo.flags == MediaCodec.BUFFER_FLAG_KEY_FRAME) {
+                                keyFrame = true;
+                                if (encoder.get().onMediaInfoListener != null) {
+                                    encoder.get().onMediaInfoListener.onSPSPPSInfo(sps);
+                                }
+                            }
+                            if (encoder.get().onMediaInfoListener != null) {
+                                encoder.get().onMediaInfoListener.onVideoInfo(data, keyFrame);
+                                encoder.get().onMediaInfoListener.onMediaTime((int) (videoBufferinfo.presentationTimeUs / 1000000));
+                            }
+                            videoEncodec.releaseOutputBuffer(outputBufferIndex, false);
+                            outputBufferIndex = videoEncodec.dequeueOutputBuffer(videoBufferinfo, 0);
+
+                        }
                     }
                 }
             }
         }
 
-        public void exit()
-        {
+        public void exit() {
             isExit = true;
+        }
+
+
+        private void onPause(boolean pause) {
+            isPause = pause;
+
         }
 
     }
 
-    public interface OnMediaInfoListener
-    {
+    public interface OnMediaInfoListener {
         void onMediaTime(int times);
 
         void onSPSPPSInfo(byte[] head);
@@ -446,23 +372,35 @@ public class CameraRecordEncoder {
 
     }
 
+    public void pause() {
 
-    public static String byteToHex(byte[] bytes)
-    {
+        if (wlEGLMediaThread != null) {
+            wlEGLMediaThread.onPause(true);
+        }
+        if (videoEncodecThread != null) {
+            videoEncodecThread.onPause(true);
+        }
+    }
+
+    public void resume() {
+        if (wlEGLMediaThread != null) {
+            wlEGLMediaThread.onPause(false);
+        }
+        if (videoEncodecThread != null) {
+            videoEncodecThread.onPause(false);
+        }
+    }
+
+    public static String byteToHex(byte[] bytes) {
         StringBuffer stringBuffer = new StringBuffer();
-        for(int i = 0; i < bytes.length; i++)
-        {
+        for (int i = 0; i < bytes.length; i++) {
             String hex = Integer.toHexString(bytes[i]);
-            if(hex.length() == 1)
-            {
+            if (hex.length() == 1) {
                 stringBuffer.append("0" + hex);
-            }
-            else
-            {
+            } else {
                 stringBuffer.append(hex);
             }
-            if(i > 20)
-            {
+            if (i > 20) {
                 break;
             }
         }

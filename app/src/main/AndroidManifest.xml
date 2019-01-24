@@ -40,7 +40,7 @@
         <activity android:name=".media.MediaActivity" />
         <activity android:name=".camera0.RecordActivity" />
         <activity android:name=".playH265.PlayH265Activtiy" />
-        <activity android:name=".LivePushActivity"/>
+        <activity android:name=".LivePushActivity" />
 
     </application>
 

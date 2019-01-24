@@ -101,6 +101,9 @@ public abstract class EGLSurfaceView extends SurfaceView implements SurfaceHolde
         wlEGLThread = null;
         surface = null;
         eglContext = null;
+        if(wlGLRender!=null){
+            wlGLRender.onSurfaceDestroy();
+        }
     }
 
     public interface WlGLRender
@@ -108,6 +111,7 @@ public abstract class EGLSurfaceView extends SurfaceView implements SurfaceHolde
         void onSurfaceCreated();
         void onSurfaceChanged(int width, int height);
         void onDrawFrame();
+        void onSurfaceDestroy();
     }
 
 

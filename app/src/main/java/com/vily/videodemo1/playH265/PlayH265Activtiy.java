@@ -35,6 +35,7 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
     private SurfaceHolder holder;
     //文件路径
     private String path0 = Environment.getExternalStorageDirectory() + "/vilyxxx.h265";
+//    private String path0 = Environment.getExternalStorageDirectory() + "/ganwuhhh.h265";
 
 
     private String TAG = "H264FileDecodeActivity";
@@ -429,6 +430,7 @@ public class PlayH265Activtiy extends AppCompatActivity implements SurfaceHolder
 //        stopCodec0();
 
         mCameraRecordDecoder.onDestroy();
+
     }
 
 }
